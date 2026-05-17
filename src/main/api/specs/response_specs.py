@@ -40,3 +40,16 @@ class ResponseSpecs:
                 f"Expected error field '{error_key}' to be '{error_value}', but got '{actual_value}'."
             )
         return check
+
+    @staticmethod
+    def request_returns_bad_request_with_text(
+            error_text: str
+    ) -> Callable[[Response], None]:
+        def check(response: Response):
+            assert response.status_code == HTTPStatus.BAD_REQUEST, (
+                f"Expected 400 BAD_REQUEST, got {response.status_code}. Response: {response.text}"
+            )
+            assert error_text in response.text, (
+                f"Expected response text to contain '{error_text}', but got '{response.text}'."
+            )
+        return check

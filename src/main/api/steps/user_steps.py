@@ -1,6 +1,8 @@
+from src.main.api.classes import api_manager
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.comparison.model_assertions import ModelAssertions
+from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
 from src.main.api.requests.skeleton.requesters.validated_crud_requester import ValidatedCrudRequester
 from src.main.api.models.create_user_response import CreateUserResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
@@ -34,3 +36,25 @@ class UserSteps(BaseSteps):
         assert create_account_response.balance == 0.0
         assert not create_account_response.transactions
         return create_account_response
+
+    def increase_deposit(self, user_request: CreateUserRequest, id: int, balance: int):
+        increase_deposit_request = IncreaseDepositRequest(
+            id=id,
+            balance=balance
+        )
+        CrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.ACCOUNTS_DEPOSIT,
+            ResponseSpecs.request_returns_ok()
+        ).post(increase_deposit_request)
+
+    def increase_deposit_over_limit(self, user_request: CreateUserRequest, id: int, balance: int, error_text: str):
+        increase_deposit_request = IncreaseDepositRequest(
+            id=id,
+            balance=balance
+        )
+        CrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.ACCOUNTS_DEPOSIT,
+            ResponseSpecs.request_returns_bad_request_with_text(error_text)
+        ).post(increase_deposit_request)
