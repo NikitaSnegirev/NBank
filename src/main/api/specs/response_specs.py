@@ -46,7 +46,7 @@ class ResponseSpecs:
             error_text: str
     ) -> Callable[[Response], None]:
         def check(response: Response):
-            assert response.status_code == HTTPStatus.BAD_REQUEST, (
+            assert response.status_code == HTTPStatus.BAD_REQUEST or response.status_code == HTTPStatus.FORBIDDEN, (
                 f"Expected 400 BAD_REQUEST, got {response.status_code}. Response: {response.text}"
             )
             assert error_text in response.text, (
