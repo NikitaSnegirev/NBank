@@ -21,10 +21,8 @@ class TestCreateUser:
         argvalues=[
             ('', RandomData.get_password(), 'USER', 'username', 'Username cannot be blank'),
             ('ab', RandomData.get_password(), 'USER', 'username', 'Username must be between 3 and 15 characters'),
-            ('qwertyuiopqwerty', RandomData.get_password(), 'USER', 'username',
-             'Username must be between 3 and 15 characters'),
-            ('@john_doe', RandomData.get_password(), 'USER', 'username',
-             'Username must contain only letters, digits, dashes, underscores, and dots'),
+            ('qwertyuiopqwerty', RandomData.get_password(), 'USER', 'username','Username must be between 3 and 15 characters'),
+            ('@john_doe', RandomData.get_password(), 'USER', 'username', 'Username must contain only letters, digits, dashes, underscores, and dots'),
         ]
     )
     @pytest.mark.usefixtures('api_manager')

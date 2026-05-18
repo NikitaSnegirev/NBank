@@ -12,6 +12,8 @@ from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.models.base_model import BaseModel
 from src.main.api.models.transfer_request import TransferRequest
 from src.main.api.models.transfer_response import TransferResponse
+from src.main.api.models.update_profile_request import UpdateProfileRequest
+from src.main.api.models.update_profile_response import UpdateProfileResponse
 
 
 @dataclass(frozen=True)
@@ -68,4 +70,10 @@ class Endpoint(Enum):
         url='/accounts/transfer',
         request_model=TransferRequest,
         response_model=TransferResponse
+    )
+
+    CUSTOMER_PROFILE = EndpointConfig(
+        url='/customer/profile',
+        request_model=UpdateProfileRequest,
+        response_model=UpdateProfileResponse
     )

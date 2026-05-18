@@ -1,14 +1,9 @@
 from src.main.api.models.comparison.model_assertions import ModelAssertions
 from src.main.api.models.create_account_response import CreateAccountResponse
 from src.main.api.models.create_user_request import CreateUserRequest
-from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
-from src.main.api.models.increase_deposit_response import IncreaseDepositResponse
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
-from src.main.api.models.transfer_request import TransferRequest
-from src.main.api.models.transfer_response import TransferResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
-from src.main.api.requests.skeleton.requesters.crud_requester import CrudRequester
 from src.main.api.requests.skeleton.requesters.validated_crud_requester import ValidatedCrudRequester
 from src.main.api.specs.request_specs import RequestSpecs
 from src.main.api.specs.response_specs import ResponseSpecs
@@ -36,5 +31,3 @@ class UserSteps(BaseSteps):
         assert create_account_response.balance == 0.0
         assert not create_account_response.transactions
         return create_account_response
-
-    #def update_name(self, user_request: CreateUserRequest, name: str) -> :
