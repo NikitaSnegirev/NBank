@@ -28,14 +28,14 @@ def created_account_factory(api_manager: ApiManager, created_user_factory):
         if balance > 0:
             while balance != 0:
                 if balance < 5000:
-                    account = api_manager.user_steps.increase_deposit(
+                    account = api_manager.manage_user_accounts_steps.increase_deposit(
                         user,
                         account.id,
                         balance
                     )
                     balance -= balance
                 else:
-                    account = api_manager.user_steps.increase_deposit(
+                    account = api_manager.manage_user_accounts_steps.increase_deposit(
                         user,
                         account.id,
                         5000
