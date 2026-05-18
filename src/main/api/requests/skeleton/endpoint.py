@@ -10,6 +10,8 @@ from src.main.api.models.increase_deposit_response import IncreaseDepositRespons
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.models.base_model import BaseModel
+from src.main.api.models.transfer_request import TransferRequest
+from src.main.api.models.transfer_response import TransferResponse
 
 
 @dataclass(frozen=True)
@@ -60,4 +62,10 @@ class Endpoint(Enum):
         url='/accounts/deposit',
         request_model=IncreaseDepositRequest,
         response_model=IncreaseDepositResponse
+    )
+
+    TRANSFER = EndpointConfig(
+        url='/accounts/transfer',
+        request_model=TransferRequest,
+        response_model=TransferResponse
     )

@@ -1,7 +1,6 @@
 import pytest
 
 from src.main.api.classes.api_manager import ApiManager
-from src.main.api.generators.random_data import RandomData
 from src.main.api.models.create_user_request import CreateUserRequest
 
 
@@ -18,7 +17,12 @@ class TestIncreaseDeposit:
     def test_increase_deposit(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: int):
         account = api_manager.user_steps.create_account(created_user_request)
         deposit = api_manager.user_steps.increase_deposit(created_user_request, account.id, balance)
+        transaction = deposit.transactions[0]
+
         assert deposit.balance == balance
+        assert transaction.amount == balance
+        assert transaction.type == "DEPOSIT"
+        assert transaction.relatedAccountId == account.id
 
     @pytest.mark.parametrize(
         argnames='balance, error_text',
@@ -41,9 +45,6 @@ class TestIncreaseDeposit:
 
         user_1_account = api_manager.user_steps.create_account(user_1)
         user_2_account = api_manager.user_steps.create_account(user_2)
-
-        print(user_1_account)
-        print(user_2_account)
 
         api_manager.user_steps.increase_deposit_bad_request(user_1, user_2_account.id, 100, "Unauthorized access to account")
 
