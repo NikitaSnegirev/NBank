@@ -1,6 +1,8 @@
 import pytest
 
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.generators.random_data import RandomData
+
 
 @pytest.mark.api
 class TestTransfer:
@@ -10,6 +12,7 @@ class TestTransfer:
         argvalues=[
             9999.99,
             0.01,
+            RandomData.get_random_number_divided_by_one_hundred(1, 1000000)
         ]
     )
     def test_transfer_between_users(self, api_manager: ApiManager, created_account_factory, amount: float):

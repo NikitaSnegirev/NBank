@@ -18,3 +18,7 @@ class RandomData:
         password = upper + lower + digits + special
         random.shuffle(password)
         return ''.join(password)
+
+    @staticmethod
+    def get_random_number_divided_by_one_hundred(min_cents: int, max_cents: int) -> float:
+        return random.randint(min_cents, max_cents) / 100

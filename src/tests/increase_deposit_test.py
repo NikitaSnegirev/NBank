@@ -1,6 +1,7 @@
 import pytest
 
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.generators.random_data import RandomData
 from src.main.api.models.create_user_request import CreateUserRequest
 
 
@@ -11,10 +12,11 @@ class TestIncreaseDeposit:
         argvalues=[
             4999.99,
             0.01,
+            RandomData.get_random_number_divided_by_one_hundred(1, 500000)
         ]
     )
     @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: int):
+    def test_increase_deposit(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: float):
         account = api_manager.user_steps.create_account(created_user_request)
         deposit = api_manager.manage_user_accounts_steps.increase_deposit(created_user_request, account.id, balance)
         transaction = deposit.transactions[0]
@@ -34,7 +36,7 @@ class TestIncreaseDeposit:
         ]
     )
     @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit_incorrect_balance(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: int, error_text: str):
+    def test_increase_deposit_incorrect_balance(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: float, error_text: str):
         account = api_manager.user_steps.create_account(created_user_request)
         api_manager.manage_user_accounts_steps.increase_deposit_bad_request(created_user_request, account.id, balance, error_text)
 
