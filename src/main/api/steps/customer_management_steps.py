@@ -1,4 +1,5 @@
 from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.models.get_profile_response import GetProfileResponse
 from src.main.api.models.update_profile_request import UpdateProfileRequest
 from src.main.api.models.update_profile_response import UpdateProfileResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
@@ -17,7 +18,7 @@ class CustomerManagementSteps(BaseSteps):
         )
         update_profile: UpdateProfileResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
-            Endpoint.CUSTOMER_PROFILE,
+            Endpoint.CUSTOMER_UPDATE_PROFILE,
             ResponseSpecs.request_returns_ok()
         ).put(update_profile_request)
 
@@ -25,12 +26,21 @@ class CustomerManagementSteps(BaseSteps):
 
         return update_profile
 
+    def get_profile(self, user_request: CreateUserRequest) -> GetProfileResponse:
+        get_profile: GetProfileResponse = ValidatedCrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.CUSTOMER_GET_PROFILE,
+            ResponseSpecs.request_returns_ok()
+        ).get()
+
+        return get_profile
+
     def update_profile_bad_name(self, user_request: CreateUserRequest, name: str, error_text: str):
         update_profile_request = UpdateProfileRequest(
             name=name
         )
         CrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
-            Endpoint.CUSTOMER_PROFILE,
+            Endpoint.CUSTOMER_UPDATE_PROFILE,
             ResponseSpecs.request_returns_bad_request_with_text(error_text)
         ).put(update_profile_request)

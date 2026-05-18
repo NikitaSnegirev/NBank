@@ -5,6 +5,7 @@ from typing import List
 from src.main.api.models.create_account_response import CreateAccountResponse
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.create_user_response import CreateUserResponse
+from src.main.api.models.get_profile_response import GetProfileResponse
 from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
 from src.main.api.models.increase_deposit_response import IncreaseDepositResponse
 from src.main.api.models.login_user_request import LoginUserRequest
@@ -72,8 +73,14 @@ class Endpoint(Enum):
         response_model=TransferResponse
     )
 
-    CUSTOMER_PROFILE = EndpointConfig(
+    CUSTOMER_UPDATE_PROFILE = EndpointConfig(
         url='/customer/profile',
         request_model=UpdateProfileRequest,
         response_model=UpdateProfileResponse
+    )
+
+    CUSTOMER_GET_PROFILE = EndpointConfig(
+        url='/customer/profile',
+        request_model=None,
+        response_model=GetProfileResponse
     )

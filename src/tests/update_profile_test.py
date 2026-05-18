@@ -22,5 +22,4 @@ class TestUpdateProfile:
     )
     def test_update_profile_bad_name(self, api_manager: ApiManager, created_user_request: CreateUserRequest, name: str):
         api_manager.customer_management_steps.update_profile_bad_name(created_user_request, name=name, error_text="Name must contain two words with letters only")
-
-
+        assert api_manager.customer_management_steps.get_profile(created_user_request).name is None
