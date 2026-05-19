@@ -27,8 +27,8 @@ class TestTransfer:
         assert (self._get_transaction_by_type(account_transactions_sender)).amount == amount
         assert account_transactions_receiver[0].amount == amount
 
-    def test_transfer_between_one_users(self, api_manager: ApiManager, created_account_factory, amount=RandomData.get_random_number_float(1, 500000)):
-        sender, account_1 = created_account_factory(balance=5000)
+    def test_transfer_between_one_users(self, api_manager: ApiManager, created_account_factory, amount=RandomData.get_random_number_float(1, 1000000)):
+        sender, account_1 = created_account_factory(balance=10000)
         account_2 = api_manager.user_steps.create_account(sender)
 
         api_manager.manage_user_accounts_steps.transfer(sender, account_1.id, account_2.id, amount)
