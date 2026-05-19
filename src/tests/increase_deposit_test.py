@@ -15,10 +15,10 @@ class TestIncreaseDeposit:
             RandomData.get_random_number_float(1, 500000)
         ]
     )
-    @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: float):
-        account = api_manager.user_steps.create_account(created_user_request)
-        deposit = api_manager.manage_user_accounts_steps.increase_deposit(created_user_request, account.id, balance)
+    @pytest.mark.usefixtures("user_request", 'api_manager')
+    def test_increase_deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float):
+        account = api_manager.user_steps.create_account(user_request)
+        deposit = api_manager.manage_user_accounts_steps.increase_deposit(user_request, account.id, balance)
         transaction = deposit.transactions[0]
 
         assert deposit.balance == balance
@@ -26,7 +26,7 @@ class TestIncreaseDeposit:
         assert transaction.type == "DEPOSIT"
         assert transaction.relatedAccountId == account.id
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
 
         assert account_transactions[0].amount == transaction.amount
 
@@ -39,17 +39,17 @@ class TestIncreaseDeposit:
             (-1, 'Deposit amount must be at least 0.01'),
         ]
     )
-    @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit_incorrect_balance(self, api_manager: ApiManager, created_user_request: CreateUserRequest, balance: float, error_text: str):
-        account = api_manager.user_steps.create_account(created_user_request)
-        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(created_user_request, account.id, balance, error_text)
+    @pytest.mark.usefixtures("user_request", 'api_manager')
+    def test_increase_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: str):
+        account = api_manager.user_steps.create_account(user_request)
+        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_request, account.id, balance, error_text)
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
 
         assert not account_transactions
 
-    @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit_another_user_id(self, api_manager: ApiManager, created_user_factory, created_user_request: CreateUserRequest):
+    @pytest.mark.usefixtures("user_request", 'api_manager')
+    def test_increase_deposit_another_user_id(self, api_manager: ApiManager, created_user_factory, user_request: CreateUserRequest):
         user_1 = created_user_factory()
         user_2 = created_user_factory()
 
@@ -64,11 +64,11 @@ class TestIncreaseDeposit:
         assert not account_transactions_1
         assert not account_transactions_2
 
-    @pytest.mark.usefixtures("created_user_request", 'api_manager')
-    def test_increase_deposit_non_exist_id(self, api_manager: ApiManager, created_user_factory, created_user_request: CreateUserRequest):
-        account = api_manager.user_steps.create_account(created_user_request)
-        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(created_user_request, 0, 100, "Unauthorized access to account")
+    @pytest.mark.usefixtures("user_request", 'api_manager')
+    def test_increase_deposit_non_exist_id(self, api_manager: ApiManager, created_user_factory, user_request: CreateUserRequest):
+        account = api_manager.user_steps.create_account(user_request)
+        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_request, 0, 100, "Unauthorized access to account")
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
 
         assert not account_transactions

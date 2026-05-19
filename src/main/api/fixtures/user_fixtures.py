@@ -6,7 +6,7 @@ from src.main.api.classes.api_manager import ApiManager
 
 
 @pytest.fixture(scope='function')
-def created_user_request(created_user_factory):
+def user_request(created_user_factory):
     return created_user_factory()
 
 @pytest.fixture
