@@ -9,6 +9,7 @@ class TestUpdateProfile:
     def test_update_name_in_the_profile(self, api_manager: ApiManager, created_user_request: CreateUserRequest):
         profile = api_manager.customer_management_steps.update_profile(created_user_request, name="John Smith")
         assert profile.customer.name == "John Smith"
+        assert api_manager.customer_management_steps.get_profile(created_user_request).name == "John Smith"
 
     @pytest.mark.parametrize(
         argnames='name',
