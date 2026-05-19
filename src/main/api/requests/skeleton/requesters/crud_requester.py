@@ -54,3 +54,11 @@ class CrudRequester(HttpRequest, CrudEndpointInterface):
         )
         self.response_spec(response)
         return response
+
+    def get_transactions(self, account_id: int):
+        response = requests.get(
+            url=f'{self.base_url}{self.endpoint.value.url}/{account_id}/transactions',
+            headers=self.request_spec
+        )
+        self.response_spec(response)
+        return response

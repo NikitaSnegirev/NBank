@@ -7,7 +7,7 @@ from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.create_user_response import CreateUserResponse
 from src.main.api.models.get_profile_response import GetProfileResponse
 from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
-from src.main.api.models.increase_deposit_response import IncreaseDepositResponse
+from src.main.api.models.increase_deposit_response import IncreaseDepositResponse, TransactionResponse
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.models.base_model import BaseModel
@@ -71,6 +71,12 @@ class Endpoint(Enum):
         url='/accounts/transfer',
         request_model=TransferRequest,
         response_model=TransferResponse
+    )
+
+    GET_TRANSACTIONS= EndpointConfig(
+        url='/accounts',
+        request_model=None,
+        response_model=list[TransactionResponse]
     )
 
     CUSTOMER_UPDATE_PROFILE = EndpointConfig(

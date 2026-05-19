@@ -1,6 +1,7 @@
 from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.models.get_profile_response import GetProfileResponse
 from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
-from src.main.api.models.increase_deposit_response import IncreaseDepositResponse
+from src.main.api.models.increase_deposit_response import IncreaseDepositResponse, TransactionResponse
 from src.main.api.models.transfer_request import TransferRequest
 from src.main.api.models.transfer_response import TransferResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
@@ -73,3 +74,12 @@ class ManageUserAccountsSteps(BaseSteps):
             Endpoint.TRANSFER,
             ResponseSpecs.request_returns_bad_request_with_text(error_text)
         ).post(transfer_request)
+
+    def get_transactions(self, user_request: CreateUserRequest, account_id: int) -> list[TransactionResponse]:
+        transactions: list[TransactionResponse] = ValidatedCrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.GET_TRANSACTIONS,
+            ResponseSpecs.request_returns_ok()
+        ).get_transactions(account_id)
+
+        return transactions

@@ -12,7 +12,7 @@ class TestIncreaseDeposit:
         argvalues=[
             4999.99,
             0.01,
-            RandomData.get_random_number_divided_by_one_hundred(1, 500000)
+            RandomData.get_random_number_float(1, 500000)
         ]
     )
     @pytest.mark.usefixtures("created_user_request", 'api_manager')
@@ -25,6 +25,10 @@ class TestIncreaseDeposit:
         assert transaction.amount == balance
         assert transaction.type == "DEPOSIT"
         assert transaction.relatedAccountId == account.id
+
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
+
+        assert account_transactions[0].amount == transaction.amount
 
     @pytest.mark.parametrize(
         argnames='balance, error_text',
@@ -40,6 +44,10 @@ class TestIncreaseDeposit:
         account = api_manager.user_steps.create_account(created_user_request)
         api_manager.manage_user_accounts_steps.increase_deposit_bad_request(created_user_request, account.id, balance, error_text)
 
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
+
+        assert not account_transactions
+
     @pytest.mark.usefixtures("created_user_request", 'api_manager')
     def test_increase_deposit_another_user_id(self, api_manager: ApiManager, created_user_factory, created_user_request: CreateUserRequest):
         user_1 = created_user_factory()
@@ -50,9 +58,17 @@ class TestIncreaseDeposit:
 
         api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_1, user_2_account.id, 100, "Unauthorized access to account")
 
+        account_transactions_1 = api_manager.manage_user_accounts_steps.get_transactions(user_1, user_1_account.id)
+        account_transactions_2 = api_manager.manage_user_accounts_steps.get_transactions(user_2, user_2_account.id)
+
+        assert not account_transactions_1
+        assert not account_transactions_2
+
     @pytest.mark.usefixtures("created_user_request", 'api_manager')
     def test_increase_deposit_non_exist_id(self, api_manager: ApiManager, created_user_factory, created_user_request: CreateUserRequest):
-        api_manager.user_steps.create_account(created_user_request)
+        account = api_manager.user_steps.create_account(created_user_request)
         api_manager.manage_user_accounts_steps.increase_deposit_bad_request(created_user_request, 0, 100, "Unauthorized access to account")
 
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(created_user_request, account.id)
 
+        assert not account_transactions
