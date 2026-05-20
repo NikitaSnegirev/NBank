@@ -35,3 +35,11 @@ class AdminSteps(BaseSteps):
             Endpoint.ADMIN_DELETE_USER,
             ResponseSpecs.entity_was_deleted()
         ).delete(user_id)
+
+    def get_all_users(self) -> list[CreateUserRequest]:
+        response = ValidatedCrudRequester(
+            RequestSpecs.admin_auth_spec(),
+            Endpoint.ADMIN_GET_ALL_USERS,
+            ResponseSpecs.request_returns_ok()
+        ).get()
+        return response
