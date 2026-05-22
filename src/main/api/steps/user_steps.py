@@ -31,3 +31,12 @@ class UserSteps(BaseSteps):
         assert create_account_response.balance == 0.0
         assert not create_account_response.transactions
         return create_account_response
+
+    def get_all_accounts(self, user_request: CreateUserRequest) -> list[CreateAccountResponse]:
+        user_accounts: list[CreateAccountResponse] = ValidatedCrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.GET_CUSTOMER_ACCOUNTS,
+            ResponseSpecs.request_returns_ok()
+        ).get()
+
+        return user_accounts
