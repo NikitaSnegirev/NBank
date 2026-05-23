@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar
+from typing import Type, TypeVar, Callable, List
 
-from playwright.sync_api import Page, Dialog
+from playwright.sync_api import Page, Dialog, Locator
 
 from src.main.api.configs.config import Config
+from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.specs.request_specs import RequestSpecs
 
 T = TypeVar("T", bound="BasePage")
 
@@ -43,3 +45,13 @@ class BasePage(ABC):
             d.accept()
         self.page.once("dialog", _handler)
         return self
+
+    def auth_as_user(self: T, user_request: CreateUserRequest) -> None:
+        auth_token = RequestSpecs.auth_as_user(user_request.username, user_request.password).get("Authorization")
+        self.page.set_viewport_size({"width": 1920, "height": 1080})
+        self.page.goto(self.base_url)
+        self.page.evaluate('token => localStorage.setItem("authToken", token)', auth_token)
+
+        def _generate_page_elements(self, elements: Locator, constructor: Callable[[Locator], T]) -> List[T]:
+            elements.first.wait_for(state="attached", timeout=10_000)
+            return [constructor(elements.nth(i)) for i in range(elements.count())]

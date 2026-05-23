@@ -1,6 +1,7 @@
 from src.main.api.models.comparison.model_assertions import ModelAssertions
 from src.main.api.models.create_account_response import CreateAccountResponse
 from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.models.create_user_response import CreateUserResponse
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
@@ -40,3 +41,12 @@ class UserSteps(BaseSteps):
         ).get()
 
         return user_accounts
+
+        def get_profile(self, user_request: CreateUserRequest) -> CreateUserResponse:
+            user_profile: CreateUserResponse = ValidatedCrudRequester(
+                RequestSpecs.auth_as_user(user_request.username, user_request.password),
+                Endpoint.CUSTOMER_GET_PROFILE,
+                ResponseSpecs.request_returns_ok()
+            ).get()
+
+            return user_profile
