@@ -27,9 +27,9 @@ def user_request(user_factory):
 
 
 @pytest.fixture
-def created_account_factory(api_manager: ApiManager, created_user_factory):
+def created_account_factory(api_manager: ApiManager, user_factory):
     def _create_account(balance: float = 0):
-        user = created_user_factory()
+        user = user_factory()
         account = api_manager.user_steps.create_account(user)
 
         if balance > 0:
