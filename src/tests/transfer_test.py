@@ -1,12 +1,16 @@
 import pytest
 
+from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.constans.error_messages import MAX_TRANSFER_AMOUNT_MSG, MIN_TRANSFER_AMOUNT_MSG, INVALID_TRANSFER
 from src.main.api.generators.random_data import RandomData
+from src.main.api.generators.random_model_generator import RandomModelGenerator
+from src.main.api.models.transaction_type import TransactionType
+from src.main.api.models.transfer_request import TransferRequest
 
 
 @pytest.mark.api
 class TestTransfer:
-
     @pytest.mark.parametrize(
         argnames='amount',
         argvalues=[
@@ -18,26 +22,56 @@ class TestTransfer:
     def test_transfer_between_users(self, api_manager: ApiManager, created_account_factory, amount: float):
         sender, sender_account = created_account_factory(balance=10000)
         receiver, receiver_account = created_account_factory()
-
-        api_manager.manage_user_accounts_steps.transfer(sender, sender_account.id, receiver_account.id, amount)
+        transfer_request = RandomModelGenerator.generate(
+            TransferRequest,
+            senderAccountId=sender_account.id,
+            receiverAccountId=receiver_account.id,
+            amount=amount,
+        )
+        api_manager.manage_user_accounts_steps.transfer(sender, transfer_request)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
         account_transactions_receiver = api_manager.manage_user_accounts_steps.get_transactions(receiver, receiver_account.id)
 
-        assert (self._get_transaction_by_type(account_transactions_sender)).amount == amount
-        assert account_transactions_receiver[0].amount == amount
+        TransactionAssertions.has_transaction_with_amount(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT,
+            amount
+        )
+
+        TransactionAssertions.has_transaction_with_amount(
+            account_transactions_receiver,
+            TransactionType.TRANSFER_IN,
+            amount
+        )
 
     def test_transfer_between_one_users(self, api_manager: ApiManager, created_account_factory, amount=RandomData.get_random_number_float(1, 1000000)):
         sender, account_1 = created_account_factory(balance=10000)
         account_2 = api_manager.user_steps.create_account(sender)
 
-        api_manager.manage_user_accounts_steps.transfer(sender, account_1.id, account_2.id, amount)
+        transfer_request = RandomModelGenerator.generate(
+            TransferRequest,
+            senderAccountId=account_1.id,
+            receiverAccountId=account_2.id,
+            amount=amount,
+        )
+
+        api_manager.manage_user_accounts_steps.transfer(sender, transfer_request)
 
         account_transactions_1 = api_manager.manage_user_accounts_steps.get_transactions(sender, account_1.id)
         account_transactions_2 = api_manager.manage_user_accounts_steps.get_transactions(sender, account_2.id)
 
-        assert (self._get_transaction_by_type(account_transactions_1)).amount == amount
-        assert account_transactions_2[0].amount == amount
+        TransactionAssertions.has_transaction_with_amount(
+            account_transactions_1,
+            TransactionType.TRANSFER_OUT,
+            amount
+        )
+
+        TransactionAssertions.has_transaction_with_amount(
+            account_transactions_2,
+            TransactionType.TRANSFER_IN,
+            amount
+        )
 
     @pytest.mark.parametrize(
         argnames='amount',
@@ -50,42 +84,59 @@ class TestTransfer:
         sender, sender_account = created_account_factory(balance=10000.01)
         receiver, receiver_account = created_account_factory()
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, sender_account.id, receiver_account.id, amount, "Transfer amount cannot exceed 10000")
+        transfer_request = RandomModelGenerator.generate(
+            TransferRequest,
+            senderAccountId=sender_account.id,
+            receiverAccountId=receiver_account.id,
+            amount=amount,
+        )
+
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, MAX_TRANSFER_AMOUNT_MSG)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
-        assert not self._get_transaction_by_type(account_transactions_sender)
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )
 
 
     def test_transfer_below_minimum(self, api_manager: ApiManager, created_account_factory):
         sender, sender_account = created_account_factory(balance=3000)
         receiver, receiver_account = created_account_factory()
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, sender_account.id, receiver_account.id, -1, "Transfer amount must be at least 0.01")
+        transfer_request = RandomModelGenerator.generate(
+            TransferRequest,
+            senderAccountId=sender_account.id,
+            receiverAccountId=receiver_account.id,
+            amount=-1,
+        )
+
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, MIN_TRANSFER_AMOUNT_MSG)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
-        assert not self._get_transaction_by_type(account_transactions_sender)
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )
 
     def test_transfer_below_balance(self, api_manager: ApiManager, created_account_factory):
         sender, sender_account = created_account_factory(balance=3000)
         receiver, receiver_account = created_account_factory()
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, sender_account.id, receiver_account.id, 3000.01, "Invalid transfer: insufficient funds or invalid accounts")
+        transfer_request = RandomModelGenerator.generate(
+            TransferRequest,
+            senderAccountId=sender_account.id,
+            receiverAccountId=receiver_account.id,
+            amount=3000.01,
+        )
+
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, INVALID_TRANSFER)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
-        assert not self._get_transaction_by_type(account_transactions_sender)
-
-
-    def _get_transaction_by_type(self, transactions: list):
-        filtered_transactions = [
-            transaction
-            for transaction in transactions
-            if transaction.type == "TRANSFER_OUT"
-        ]
-
-        if len(filtered_transactions) > 0 :
-            return filtered_transactions[0]
-        else:
-            return None
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )

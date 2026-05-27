@@ -9,7 +9,7 @@ from src.main.api.generators.generating_rule import GeneratingRule
 
 class RandomModelGenerator:
     @staticmethod
-    def generate(cls: type) -> Any:
+    def generate(cls: type, **overrides) -> Any:
         type_hints = get_type_hints(cls, include_extras=True)
         init_data = {}
 
@@ -28,6 +28,8 @@ class RandomModelGenerator:
                 value = RandomModelGenerator._generate_value(actual_type)
 
             init_data[field_name] = value
+
+        init_data.update(overrides)
 
         return cls(**init_data)
 

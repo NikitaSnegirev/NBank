@@ -42,13 +42,7 @@ class ManageUserAccountsSteps(BaseSteps):
             ResponseSpecs.request_returns_bad_request_with_text(error_text)
         ).post(increase_deposit_request)
 
-
-    def transfer(self, user_request: CreateUserRequest, sender_account_id: int, receiver_account_id: int, amount: float) -> TransferResponse:
-        transfer_request = TransferRequest(
-            senderAccountId=sender_account_id,
-            receiverAccountId=receiver_account_id,
-            amount=amount
-        )
+    def transfer(self, user_request: CreateUserRequest, transfer_request: TransferRequest) -> TransferResponse:
         transfer_response: TransferResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,
@@ -60,13 +54,7 @@ class ManageUserAccountsSteps(BaseSteps):
 
         return transfer_response
 
-
-    def transfer_bad_request(self, user_request: CreateUserRequest, sender_account_id: int, receiver_account_id: int, amount: float, error_text: str):
-        transfer_request = TransferRequest(
-            senderAccountId=sender_account_id,
-            receiverAccountId=receiver_account_id,
-            amount=amount
-        )
+    def transfer_bad_request(self, user_request: CreateUserRequest, transfer_request: TransferRequest, error_text: str):
         CrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,
