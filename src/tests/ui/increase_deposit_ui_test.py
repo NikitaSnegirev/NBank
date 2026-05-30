@@ -53,10 +53,7 @@ class TestIncreaseDeposit:
     ):
         account = api_manager.user_steps.create_account(user_request)
 
-        dashboard_page = UserDashboard(page).open()
-        expect(dashboard_page.welcome_text).to_be_visible()
-
-        deposit_page = dashboard_page.deposit_money()
+        deposit_page = DepositMoney(page).open()
         expect(deposit_page.deposit_money_header).to_be_visible()
         deposit_page.select_account(str(account.id))
         deposit_page.enter_amount(amount)
@@ -70,10 +67,7 @@ class TestIncreaseDeposit:
             user_request: CreateUserRequest,
             amount: str = str(RandomData.get_random_number_float(1, 500000))
     ):
-        dashboard_page = UserDashboard(page).open()
-        expect(dashboard_page.welcome_text).to_be_visible()
-
-        deposit_page = dashboard_page.deposit_money()
+        deposit_page = DepositMoney(page).open()
         expect(deposit_page.deposit_money_header).to_be_visible()
         deposit_page.enter_amount(amount)
         deposit_page.deposit_click_and_check_msg(BankAlert.ACCOUNT_NOT_SELECTED_DEPOSIT)
