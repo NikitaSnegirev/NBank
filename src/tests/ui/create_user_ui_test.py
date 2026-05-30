@@ -21,8 +21,8 @@ class TestCreateUser:
 
         admin_page = AdminPanel(page).open()
         expect(admin_page.admin_panel_text).to_be_visible()
-        admin_page.create_user(new_user_request.username, new_user_request.password)
         admin_page.check_alert_message_and_accept(BankAlert.USER_CREATED_SUCCESSFULLY)
+        admin_page.create_user(new_user_request.username, new_user_request.password)
         admin_page.wait_for_username(new_user_request.username)
 
         created_user = next(
@@ -42,7 +42,7 @@ class TestCreateUser:
         admin_page = AdminPanel(page).open()
         expect(admin_page.admin_panel_text).to_be_visible()
 
-        admin_page = admin_page.create_user(new_user_request.username, new_user_request.password)
         admin_page.check_alert_message_and_accept(BankAlert.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS)
+        admin_page = admin_page.create_user(new_user_request.username, new_user_request.password)
         assert not any(u.username == new_user_request.username for u in admin_page.get_all_users())
         assert not any(u.username == new_user_request.username for u in api_manager.admin_steps.get_all_users())
