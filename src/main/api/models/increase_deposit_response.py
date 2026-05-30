@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 
+from src.main.api.models.transaction_type import TransactionType
+
+
 class TransactionResponse(BaseModel):
     id: int
     amount: float
-    type: str
+    type: TransactionType
     timestamp: str
     relatedAccountId: int
 

@@ -1,5 +1,5 @@
+from src.main.api.models.comparison.model_assertions import ModelAssertions
 from src.main.api.models.create_user_request import CreateUserRequest
-from src.main.api.models.get_profile_response import GetProfileResponse
 from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
 from src.main.api.models.increase_deposit_response import IncreaseDepositResponse, TransactionResponse
 from src.main.api.models.transfer_request import TransferRequest
@@ -25,7 +25,7 @@ class ManageUserAccountsSteps(BaseSteps):
             ResponseSpecs.request_returns_ok()
         ).post(increase_deposit_request)
 
-        assert increase_deposit_response.id == id
+        ModelAssertions(increase_deposit_request, increase_deposit_response).match()
         assert increase_deposit_response.transactions
 
         return increase_deposit_response
@@ -42,33 +42,19 @@ class ManageUserAccountsSteps(BaseSteps):
             ResponseSpecs.request_returns_bad_request_with_text(error_text)
         ).post(increase_deposit_request)
 
-
-    def transfer(self, user_request: CreateUserRequest, sender_account_id: int, receiver_account_id: int, amount: float) -> TransferResponse:
-        transfer_request = TransferRequest(
-            senderAccountId=sender_account_id,
-            receiverAccountId=receiver_account_id,
-            amount=amount
-        )
+    def transfer(self, user_request: CreateUserRequest, transfer_request: TransferRequest) -> TransferResponse:
         transfer_response: TransferResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,
             ResponseSpecs.request_returns_ok()
         ).post(transfer_request)
 
-        assert transfer_response.receiverAccountId == receiver_account_id
-        assert transfer_response.amount == amount
+        ModelAssertions(transfer_request, transfer_response).match()
         assert transfer_response.message == "Transfer successful"
-        assert transfer_response.senderAccountId == sender_account_id
 
         return transfer_response
 
-
-    def transfer_bad_request(self, user_request: CreateUserRequest, sender_account_id: int, receiver_account_id: int, amount: float, error_text: str):
-        transfer_request = TransferRequest(
-            senderAccountId=sender_account_id,
-            receiverAccountId=receiver_account_id,
-            amount=amount
-        )
+    def transfer_bad_request(self, user_request: CreateUserRequest, transfer_request: TransferRequest, error_text: str):
         CrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,

@@ -1,8 +1,11 @@
 import pytest
 
+from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.constans.error_messages import NOT_UNAUTHORIZED_MSG
 from src.main.api.generators.random_data import RandomData
 from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.models.transaction_type import TransactionType
 
 
 @pytest.mark.api
@@ -23,7 +26,7 @@ class TestIncreaseDeposit:
 
         assert deposit.balance == balance
         assert transaction.amount == balance
-        assert transaction.type == "DEPOSIT"
+        assert transaction.type == TransactionType.DEPOSIT
         assert transaction.relatedAccountId == account.id
 
         account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
@@ -44,9 +47,7 @@ class TestIncreaseDeposit:
         account = api_manager.user_steps.create_account(user_request)
         api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_request, account.id, balance, error_text)
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
-
-        assert not account_transactions
+        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
 
     @pytest.mark.usefixtures("user_request", 'api_manager')
     def test_increase_deposit_another_user_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest):
@@ -56,19 +57,14 @@ class TestIncreaseDeposit:
         user_1_account = api_manager.user_steps.create_account(user_1)
         user_2_account = api_manager.user_steps.create_account(user_2)
 
-        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_1, user_2_account.id, 100, "Unauthorized access to account")
+        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_1, user_2_account.id, 100, NOT_UNAUTHORIZED_MSG)
 
-        account_transactions_1 = api_manager.manage_user_accounts_steps.get_transactions(user_1, user_1_account.id)
-        account_transactions_2 = api_manager.manage_user_accounts_steps.get_transactions(user_2, user_2_account.id)
-
-        assert not account_transactions_1
-        assert not account_transactions_2
+        TransactionAssertions.has_no_transactions(api_manager, user_1, user_1_account.id)
+        TransactionAssertions.has_no_transactions(api_manager, user_2, user_2_account.id)
 
     @pytest.mark.usefixtures("user_request", 'api_manager')
     def test_increase_deposit_non_exist_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest):
         account = api_manager.user_steps.create_account(user_request)
-        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_request, 0, 100, "Unauthorized access to account")
+        api_manager.manage_user_accounts_steps.increase_deposit_bad_request(user_request, 0, 100, NOT_UNAUTHORIZED_MSG)
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
-
-        assert not account_transactions
+        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
