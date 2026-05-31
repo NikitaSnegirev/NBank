@@ -1,5 +1,6 @@
 from src.main.ui.pages.base_page import BasePage
 from src.main.ui.pages.deposit_money import DepositMoney
+from src.main.ui.pages.make_transfer import MakeTransfer
 
 
 class UserDashboard(BasePage):
@@ -15,6 +16,10 @@ class UserDashboard(BasePage):
     def deposit_money_button(self):
         return self.page.get_by_role("button", name="💰 Deposit Money")
 
+    @property
+    def make_transfer_button(self):
+        return self.page.get_by_role("button", name="🔄 Make a Transfer")
+
     def url(self):
         return "/dashboard"
 
@@ -25,3 +30,7 @@ class UserDashboard(BasePage):
     def deposit_money(self):
         self.deposit_money_button.click()
         return self.get_page(DepositMoney)
+
+    def make_transfer(self):
+        self.make_transfer_button.click()
+        return self.get_page(MakeTransfer)
