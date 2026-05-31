@@ -15,6 +15,9 @@ class BankAlert(str, Enum):
     INSUFFICIENT_FUNDS_OR_INVALID_ACCOUNTS_TRANSFER = "❌ Error: Invalid transfer: insufficient funds or invalid accounts"
     FILL_ALL_FIELDS_TRANSFER = "❌ Please fill all fields and confirm."
 
+    UPDATED_SUCCESSFULLY_NAME = "✅ Name updated successfully!"
+    UPDATED_UNSUCCESSFULLY_NAME = "Name must contain two words with letters only"
+
 def successfully_deposited(amount: str, account_number: str) -> str:
     return f"✅ Successfully deposited ${amount} to account {account_number}!"
 

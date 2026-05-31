@@ -1,6 +1,7 @@
 import pytest
 from playwright.sync_api import Page, expect
 
+from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
 from src.main.api.generators.random_data import RandomData
 from src.main.api.models.create_user_request import CreateUserRequest
@@ -59,8 +60,10 @@ class TestIncreaseDeposit:
         deposit_page.enter_amount(amount)
         deposit_page.deposit_click_and_check_msg(error_text)
 
+        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
+
     @pytest.mark.user_session(1)
-    def test_user_can_increase_deposit(
+    def test_account_not_selected_deposit(
             self,
             api_manager: ApiManager,
             page: Page,

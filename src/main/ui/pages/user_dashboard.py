@@ -1,6 +1,7 @@
 from src.main.ui.pages.base_page import BasePage
 from src.main.ui.pages.deposit_money import DepositMoney
 from src.main.ui.pages.make_transfer import MakeTransfer
+from src.main.ui.pages.edit_profile import EditProfile
 
 
 class UserDashboard(BasePage):
@@ -20,6 +21,10 @@ class UserDashboard(BasePage):
     def make_transfer_button(self):
         return self.page.get_by_role("button", name="🔄 Make a Transfer")
 
+    @property
+    def profile_button(self):
+        return self.page.locator(".user-info")
+
     def url(self):
         return "/dashboard"
 
@@ -34,3 +39,7 @@ class UserDashboard(BasePage):
     def make_transfer(self):
         self.make_transfer_button.click()
         return self.get_page(MakeTransfer)
+
+    def profile(self):
+        self.profile_button.click()
+        return self.get_page(EditProfile)

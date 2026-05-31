@@ -46,7 +46,6 @@ class TestTransfer:
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
         account_transactions_receiver = api_manager.manage_user_accounts_steps.get_transactions(receiver, receiver_account.id)
-        print(account_transactions_sender)
 
         TransactionAssertions.has_transaction_with_amount(
             account_transactions_sender,
@@ -92,6 +91,13 @@ class TestTransfer:
         make_transfer.confirm_check_click()
         make_transfer.send_transfer_and_check_msg(error_text)
 
+        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )
+
     @pytest.mark.user_session(2)
     def test_transfer_below_balance(
             self,
@@ -115,6 +121,13 @@ class TestTransfer:
         make_transfer.confirm_check_click()
         make_transfer.send_transfer_and_check_msg(BankAlert.INSUFFICIENT_FUNDS_OR_INVALID_ACCOUNTS_TRANSFER)
 
+        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )
+
     @pytest.mark.user_session(1)
     def test_transfer_empty_form(
             self,
@@ -123,7 +136,16 @@ class TestTransfer:
             user_request: CreateUserRequest,
             created_account_factory,
     ):
+        sender = SessionStorage.get_user(0)
+        sender, sender_account = created_account_factory(user=sender)
 
         make_transfer = MakeTransfer(page).open()
         expect(make_transfer.make_transfer_header).to_be_visible()
         make_transfer.send_transfer_and_check_msg(BankAlert.FILL_ALL_FIELDS_TRANSFER)
+
+        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+
+        TransactionAssertions.has_no_transaction_by_type(
+            account_transactions_sender,
+            TransactionType.TRANSFER_OUT
+        )
