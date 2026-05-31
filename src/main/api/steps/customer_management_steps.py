@@ -19,11 +19,8 @@ class CustomerManagementSteps(BaseSteps):
         update_profile: UpdateProfileResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.CUSTOMER_UPDATE_PROFILE,
-            ResponseSpecs.request_returns_ok()
+            ResponseSpecs.profile_updated_successfully()
         ).put(update_profile_request)
-
-        assert update_profile.message == "Profile updated successfully"
-
         return update_profile
 
     def get_profile(self, user_request: CreateUserRequest) -> GetProfileResponse:

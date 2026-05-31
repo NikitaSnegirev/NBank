@@ -53,3 +53,29 @@ class ResponseSpecs:
                 f"Expected response text to contain '{error_text}', but got '{response.text}'."
             )
         return check
+
+    @staticmethod
+    def profile_updated_successfully():
+        def check(response: Response):
+            check_ok = ResponseSpecs.request_returns_ok()
+            check_ok(response)
+
+            actual_message = response.json().get("message")
+            assert actual_message == "Profile updated successfully", (
+                f"Expected message 'Profile updated successfully', but got '{actual_message}'."
+            )
+
+        return check
+
+    @staticmethod
+    def transfer_successfully():
+        def check(response: Response):
+            check_ok = ResponseSpecs.request_returns_ok()
+            check_ok(response)
+
+            actual_message = response.json().get("message")
+            assert actual_message == "Transfer successful2", (
+                f"Expected message 'Transfer successful', but got '{actual_message}'."
+            )
+
+        return check

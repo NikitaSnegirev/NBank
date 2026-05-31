@@ -46,11 +46,10 @@ class ManageUserAccountsSteps(BaseSteps):
         transfer_response: TransferResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,
-            ResponseSpecs.request_returns_ok()
+            ResponseSpecs.transfer_successfully()
         ).post(transfer_request)
 
         ModelAssertions(transfer_request, transfer_response).match()
-        assert transfer_response.message == "Transfer successful"
 
         return transfer_response
 
