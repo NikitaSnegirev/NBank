@@ -2,11 +2,11 @@ import pytest
 
 from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
-from src.main.api.constans.error_messages import MAX_TRANSFER_AMOUNT_MSG, MIN_TRANSFER_AMOUNT_MSG, INVALID_TRANSFER
 from src.main.api.generators.random_data import RandomData
 from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.transaction_type import TransactionType
 from src.main.api.models.transfer_request import TransferRequest
+from src.main.api.specs.response_specs import ResponseError
 
 
 @pytest.mark.api
@@ -91,7 +91,7 @@ class TestTransfer:
             amount=amount,
         )
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, MAX_TRANSFER_AMOUNT_MSG)
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.MAX_TRANSFER_AMOUNT)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
@@ -112,7 +112,7 @@ class TestTransfer:
             amount=-1,
         )
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, MIN_TRANSFER_AMOUNT_MSG)
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.MIN_TRANSFER_AMOUNT)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
@@ -132,7 +132,7 @@ class TestTransfer:
             amount=3000.01,
         )
 
-        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, INVALID_TRANSFER)
+        api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.INVALID_TRANSFER)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
