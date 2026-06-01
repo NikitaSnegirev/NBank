@@ -74,7 +74,7 @@ class ResponseSpecs:
             check_ok(response)
 
             actual_message = response.json().get("message")
-            assert actual_message == "Transfer successful2", (
+            assert actual_message == "Transfer successful", (
                 f"Expected message 'Transfer successful', but got '{actual_message}'."
             )
 

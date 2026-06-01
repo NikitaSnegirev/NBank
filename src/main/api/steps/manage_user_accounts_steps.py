@@ -1,7 +1,7 @@
 from src.main.api.models.comparison.model_assertions import ModelAssertions
 from src.main.api.models.create_user_request import CreateUserRequest
-from src.main.api.models.increase_deposit_request import IncreaseDepositRequest
-from src.main.api.models.increase_deposit_response import IncreaseDepositResponse, TransactionResponse
+from src.main.api.models.deposit_request import DepositRequest
+from src.main.api.models.deposit_response import DepositResponse, TransactionResponse
 from src.main.api.models.transfer_request import TransferRequest
 from src.main.api.models.transfer_response import TransferResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
@@ -14,25 +14,25 @@ from src.main.api.steps.base_steps import BaseSteps
 
 class ManageUserAccountsSteps(BaseSteps):
 
-    def increase_deposit(self, user_request: CreateUserRequest, id: int, balance: int) -> IncreaseDepositResponse:
-        increase_deposit_request = IncreaseDepositRequest(
+    def deposit(self, user_request: CreateUserRequest, id: int, balance: int) -> DepositResponse:
+        deposit_request = DepositRequest(
             id=id,
             balance=balance
         )
-        increase_deposit_response: IncreaseDepositResponse = ValidatedCrudRequester(
+        deposit_response: DepositResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.ACCOUNTS_DEPOSIT,
             ResponseSpecs.request_returns_ok()
-        ).post(increase_deposit_request)
+        ).post(deposit_request)
 
-        ModelAssertions(increase_deposit_request, increase_deposit_response).match()
-        assert increase_deposit_response.transactions
+        ModelAssertions(deposit_request, deposit_response).match()
+        assert deposit_response.transactions
 
-        return increase_deposit_response
+        return deposit_response
 
 
-    def increase_deposit_bad_request(self, user_request: CreateUserRequest, id: int, balance: int, error_text: str):
-        increase_deposit_request = IncreaseDepositRequest(
+    def deposit_bad_request(self, user_request: CreateUserRequest, id: int, balance: int, error_text: str):
+        deposit_request = DepositRequest(
             id=id,
             balance=balance
         )
@@ -40,7 +40,7 @@ class ManageUserAccountsSteps(BaseSteps):
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.ACCOUNTS_DEPOSIT,
             ResponseSpecs.request_returns_bad_request_with_text(error_text)
-        ).post(increase_deposit_request)
+        ).post(deposit_request)
 
     def transfer(self, user_request: CreateUserRequest, transfer_request: TransferRequest) -> TransferResponse:
         transfer_response: TransferResponse = ValidatedCrudRequester(

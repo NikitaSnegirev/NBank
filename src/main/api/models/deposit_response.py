@@ -11,7 +11,7 @@ class TransactionResponse(BaseModel):
     relatedAccountId: int
 
 
-class IncreaseDepositResponse(BaseModel):
+class DepositResponse(BaseModel):
     id: int
     accountNumber: str
     balance: float
