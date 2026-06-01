@@ -8,7 +8,7 @@ from src.main.api.requests.skeleton.endpoint import Endpoint
 from src.main.api.requests.skeleton.requesters.crud_requester import CrudRequester
 from src.main.api.requests.skeleton.requesters.validated_crud_requester import ValidatedCrudRequester
 from src.main.api.specs.request_specs import RequestSpecs
-from src.main.api.specs.response_specs import ResponseSpecs
+from src.main.api.specs.response_specs import ResponseError, ResponseSpecs
 from src.main.api.steps.base_steps import BaseSteps
 
 
@@ -31,7 +31,7 @@ class ManageUserAccountsSteps(BaseSteps):
         return deposit_response
 
 
-    def deposit_bad_request(self, user_request: CreateUserRequest, id: int, balance: int, error_text: str):
+    def deposit_bad_request(self, user_request: CreateUserRequest, id: int, balance: int, error_text: ResponseError):
         deposit_request = DepositRequest(
             id=id,
             balance=balance
@@ -53,7 +53,7 @@ class ManageUserAccountsSteps(BaseSteps):
 
         return transfer_response
 
-    def transfer_bad_request(self, user_request: CreateUserRequest, transfer_request: TransferRequest, error_text: str):
+    def transfer_bad_request(self, user_request: CreateUserRequest, transfer_request: TransferRequest, error_text: ResponseError):
         CrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
             Endpoint.TRANSFER,

@@ -2,10 +2,10 @@ import pytest
 
 from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
-from src.main.api.constans.error_messages import NOT_UNAUTHORIZED_MSG, DEPOSIT_OVER_LIMIT_MSG, MIN_DEPOSIT_AMOUNT_MSG
 from src.main.api.generators.random_data import RandomData
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.transaction_type import TransactionType
+from src.main.api.specs.response_specs import ResponseError
 
 
 @pytest.mark.api
@@ -19,7 +19,7 @@ class TestDeposit:
         ]
     )
     @pytest.mark.usefixtures("user_request", 'api_manager')
-    def test__deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float):
+    def test_deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float):
         account = api_manager.user_steps.create_account(user_request)
         deposit = api_manager.manage_user_accounts_steps.deposit(user_request, account.id, balance)
         transaction = deposit.transactions[0]
@@ -36,14 +36,14 @@ class TestDeposit:
     @pytest.mark.parametrize(
         argnames='balance, error_text',
         argvalues=[
-            (5000.1, DEPOSIT_OVER_LIMIT_MSG),
-            (5001, DEPOSIT_OVER_LIMIT_MSG),
-            (0, MIN_DEPOSIT_AMOUNT_MSG),
-            (-1, MIN_DEPOSIT_AMOUNT_MSG),
+            (5000.1, ResponseError.DEPOSIT_OVER_LIMIT),
+            (5001, ResponseError.DEPOSIT_OVER_LIMIT),
+            (0, ResponseError.MIN_DEPOSIT_AMOUNT),
+            (-1, ResponseError.MIN_DEPOSIT_AMOUNT),
         ]
     )
     @pytest.mark.usefixtures("user_request", 'api_manager')
-    def test_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: str):
+    def test_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: ResponseError ):
         account = api_manager.user_steps.create_account(user_request)
         api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, account.id, balance, error_text)
 
@@ -57,7 +57,7 @@ class TestDeposit:
         user_1_account = api_manager.user_steps.create_account(user_1)
         user_2_account = api_manager.user_steps.create_account(user_2)
 
-        api_manager.manage_user_accounts_steps.deposit_bad_request(user_1, user_2_account.id, 100, NOT_UNAUTHORIZED_MSG)
+        api_manager.manage_user_accounts_steps.deposit_bad_request(user_1, user_2_account.id, 100, ResponseError.UNAUTHORIZED_ACCESS_TO_ACCOUNT)
 
         TransactionAssertions.has_no_transactions(api_manager, user_1, user_1_account.id)
         TransactionAssertions.has_no_transactions(api_manager, user_2, user_2_account.id)
@@ -65,6 +65,6 @@ class TestDeposit:
     @pytest.mark.usefixtures("user_request", 'api_manager')
     def test_deposit_non_exist_id(self, api_manager: ApiManager, created_user_factory, user_request: CreateUserRequest):
         account = api_manager.user_steps.create_account(user_request)
-        api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, 0, 100, NOT_UNAUTHORIZED_MSG)
+        api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, 0, 100, ResponseError.UNAUTHORIZED_ACCESS_TO_ACCOUNT)
 
         TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
