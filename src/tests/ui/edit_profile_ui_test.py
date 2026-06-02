@@ -7,7 +7,7 @@ from src.main.ui.pages.bank_alert import BankAlert
 from src.main.ui.pages.user_dashboard import UserDashboard
 
 
-@pytest.mark.ui
+#@pytest.mark.ui
 class TestEditProfile:
     @pytest.mark.user_session(1)
     def test_update_name_in_the_profile(

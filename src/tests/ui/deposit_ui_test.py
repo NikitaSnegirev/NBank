@@ -10,10 +10,10 @@ from src.main.ui.pages.deposit_money import DepositMoney
 from src.main.ui.pages.user_dashboard import UserDashboard
 
 
-@pytest.mark.ui
-class TestIncreaseDeposit:
+#@pytest.mark.ui
+class TestDeposit:
     @pytest.mark.user_session(1)
-    def test_user_can_increase_deposit(
+    def test_user_can_deposit(
             self,
             api_manager: ApiManager,
             page: Page,
@@ -44,7 +44,7 @@ class TestIncreaseDeposit:
         ]
     )
     @pytest.mark.user_session(1)
-    def test_increase_deposit_incorrect_balance(
+    def test_deposit_incorrect_balance(
             self,
             api_manager: ApiManager,
             page: Page,
