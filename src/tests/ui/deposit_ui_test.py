@@ -10,7 +10,7 @@ from src.main.ui.pages.deposit_money import DepositMoney
 from src.main.ui.pages.user_dashboard import UserDashboard
 
 
-#@pytest.mark.ui
+@pytest.mark.ui
 class TestDeposit:
     @pytest.mark.user_session(1)
     def test_user_can_deposit(

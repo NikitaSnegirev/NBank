@@ -12,7 +12,7 @@ from src.main.ui.pages.make_transfer import MakeTransfer
 from src.main.ui.pages.user_dashboard import UserDashboard
 
 
-#@pytest.mark.ui
+@pytest.mark.ui
 class TestTransfer:
     @pytest.mark.user_session(2)
     def test_transfer_between_users(

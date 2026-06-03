@@ -1,3 +1,7 @@
+from time import sleep
+
+from playwright.sync_api import expect
+
 from src.main.ui.pages.base_page import BasePage
 
 
@@ -16,6 +20,7 @@ class EditProfile(BasePage):
         return self.page.get_by_role("button", name="💾 Save Changes")
 
     def enter_new_name(self, new_name: str):
+        sleep(1) # так и не смог это победить, оставил просто слип)
         self.enter_new_name_input.fill(new_name)
         return self
 

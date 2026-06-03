@@ -2,12 +2,14 @@ import pytest
 from playwright.sync_api import Page, expect
 
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.models.update_profile_request import UpdateProfileRequest
 from src.main.ui.pages.bank_alert import BankAlert
 from src.main.ui.pages.user_dashboard import UserDashboard
 
 
-#@pytest.mark.ui
+@pytest.mark.ui
 class TestEditProfile:
     @pytest.mark.user_session(1)
     def test_update_name_in_the_profile(
