@@ -34,4 +34,12 @@ class AdminPanel(BasePage):
         expect(self.get_all_users_locator()).to_contain_text([username])
         return self
 
+    def check_page_is_visible(self):
+        expect(self.admin_panel_text).to_be_visible()
+        return self
+
+    def check_user_is_visible(self, username: str):
+        assert not any(u.username == username for u in self.get_all_users())
+        return self
+
 

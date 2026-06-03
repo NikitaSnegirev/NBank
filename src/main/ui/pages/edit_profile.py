@@ -1,7 +1,5 @@
 from time import sleep
 
-from playwright.sync_api import expect
-
 from src.main.ui.pages.base_page import BasePage
 
 
