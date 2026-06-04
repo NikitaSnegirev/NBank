@@ -3,7 +3,6 @@ from playwright.sync_api import Page, expect
 
 from src.main.api.classes.api_manager import ApiManager
 from src.main.api.generators.random_data import RandomData
-from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.comparison.model_assertions import ModelAssertions
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.role import Role
@@ -14,7 +13,6 @@ from src.main.ui.pages.bank_alert import BankAlert
 @pytest.mark.ui
 class TestCreateUser:
     @pytest.mark.admin_session
-    @pytest.mark.parametrize('new_user_request', [RandomModelGenerator.generate(CreateUserRequest)])
     def test_admin_can_create_user(self, page: Page, api_manager: ApiManager, new_user_request: CreateUserRequest):
         api_manager.admin_steps.created_objects.append(new_user_request)
 

@@ -42,11 +42,11 @@ class UserSteps(BaseSteps):
 
         return user_accounts
 
-        def get_profile(self, user_request: CreateUserRequest) -> CreateUserResponse:
-            user_profile: CreateUserResponse = ValidatedCrudRequester(
-                RequestSpecs.auth_as_user(user_request.username, user_request.password),
-                Endpoint.CUSTOMER_GET_PROFILE,
-                ResponseSpecs.request_returns_ok()
-            ).get()
+    def get_profile(self, user_request: CreateUserRequest) -> CreateUserResponse:
+        user_profile: CreateUserResponse = ValidatedCrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.CUSTOMER_GET_PROFILE,
+            ResponseSpecs.request_returns_ok()
+        ).get()
 
-            return user_profile
+        return user_profile
