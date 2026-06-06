@@ -5,6 +5,7 @@ from src.main.api.configs.config import Config
 from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.classes.api_manager import ApiManager
+from src.main.api.models.update_profile_request import UpdateProfileRequest
 
 
 def _generate_user_request() -> CreateUserRequest:
@@ -39,6 +40,9 @@ def user_request(user_factory):
         user = user_factory()
         return user
 
+@pytest.fixture(scope="function")
+def update_profile_request() -> UpdateProfileRequest:
+    return RandomModelGenerator.generate(UpdateProfileRequest)
 
 @pytest.fixture
 def created_account_factory(api_manager: ApiManager, user_factory):

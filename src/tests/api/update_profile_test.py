@@ -9,14 +9,13 @@ from src.main.api.specs.response_specs import ResponseError
 
 @pytest.mark.api
 class TestUpdateProfile:
-    def test_update_name_in_the_profile(self, api_manager: ApiManager, user_request: CreateUserRequest):
-        update_profile_request = RandomModelGenerator.generate(UpdateProfileRequest)
-
+    @pytest.mark.check_name_change(new_name_source="update_profile_request.name")
+    def test_update_name_in_the_profile(self, api_manager: ApiManager, user_request: CreateUserRequest, update_profile_request: UpdateProfileRequest):
         profile = api_manager.customer_management_steps.update_profile(user_request, name=update_profile_request.name)
 
         assert profile.customer.name == update_profile_request.name
-        assert api_manager.customer_management_steps.get_profile(user_request).name == update_profile_request.name
 
+    @pytest.mark.check_name_change(new_name=None)
     @pytest.mark.parametrize(
         argnames='name',
         argvalues=[

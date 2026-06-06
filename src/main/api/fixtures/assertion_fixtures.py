@@ -150,3 +150,36 @@ def check_accounts_change(request: pytest.FixtureRequest):
         f"Expected accounts delta={delta} (after-before), but got {len(after) - len(before)}. "
         f"before={len(before)}, after={len(after)}"
     )
+
+@pytest.fixture(autouse=True, scope="function")
+def check_name_change(request: pytest.FixtureRequest):
+    mark = request.node.get_closest_marker("check_name_change")
+    if not mark:
+        yield
+        return
+
+    missing = object()
+
+    new_name = mark.kwargs.get("new_name", missing)
+    new_name_source = mark.kwargs.get("new_name_source")
+
+    if new_name_source is not None:
+        new_name = _resolve_source(request, new_name_source)
+
+    if request.node.get_closest_marker("user_session") is not None:
+        try:
+            request.getfixturevalue("user_session_extension")
+        except Exception:
+            # In non-UI contexts this fixture may not exist; ignore.
+            pass
+
+    api_manager: ApiManager = request.getfixturevalue("api_manager")
+    user_request: CreateUserRequest = request.getfixturevalue("user_request")
+
+    yield
+
+    actual_name = api_manager.customer_management_steps.get_profile(user_request).name
+    assert actual_name == new_name , (
+        f"Expected name={new_name}, but got {actual_name}."
+    )
+

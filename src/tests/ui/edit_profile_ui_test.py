@@ -11,6 +11,7 @@ from src.main.ui.pages.user_dashboard import UserDashboard
 
 @pytest.mark.ui
 class TestEditProfile:
+    @pytest.mark.check_name_change(new_name="John Smith")
     @pytest.mark.user_session(1)
     def test_update_name_in_the_profile(
             self,
@@ -29,6 +30,7 @@ class TestEditProfile:
         assert api_manager.customer_management_steps.get_profile(user_request).name == "John Smith"
 
     @pytest.mark.user_session(1)
+    @pytest.mark.check_name_change(new_name=None)
     def test_update_profile_bad_name(
             self,
             api_manager: ApiManager,
