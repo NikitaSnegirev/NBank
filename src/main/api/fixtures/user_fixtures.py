@@ -7,10 +7,24 @@ from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.classes.api_manager import ApiManager
 
 
+def _generate_user_request() -> CreateUserRequest:
+    return RandomModelGenerator.generate(CreateUserRequest)
+
+
+@pytest.fixture(scope="function")
+def new_user_request() -> CreateUserRequest:
+    return _generate_user_request()
+
+
+@pytest.fixture(scope="function")
+def create_user_request(new_user_request: CreateUserRequest) -> CreateUserRequest:
+    return new_user_request
+
+
 @pytest.fixture(scope="function")
 def user_factory(api_manager: ApiManager):
     def create_user() -> CreateUserRequest:
-        user_data = RandomModelGenerator.generate(CreateUserRequest)
+        user_data = _generate_user_request()
         api_manager.admin_steps.create_user(user_data)
         return user_data
 

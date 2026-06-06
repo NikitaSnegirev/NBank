@@ -11,7 +11,6 @@ from src.main.api.specs.response_specs import ResponseError
 @pytest.mark.api
 class TestCreateUser:
     @pytest.mark.check_all_users_change(delta=1, username_source="create_user_request.username", should_exist=True)
-    @pytest.mark.parametrize('create_user_request', [RandomModelGenerator.generate(CreateUserRequest)])
     def test_create_valid_user(self, api_manager: ApiManager, create_user_request: CreateUserRequest):
         api_manager.admin_steps.create_user(create_user_request)
 

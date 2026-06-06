@@ -14,7 +14,6 @@ from src.main.ui.pages.bank_alert import BankAlert
 @pytest.mark.ui
 class TestCreateUser:
     @pytest.mark.admin_session
-    @pytest.mark.parametrize('new_user_request', [RandomModelGenerator.generate(CreateUserRequest)])
     @pytest.mark.entity_will_be_created("new_user_request")
     @pytest.mark.check_all_users_change(delta=1, username_source="new_user_request.username")
     def test_admin_can_create_user(self, page: Page, api_manager: ApiManager, new_user_request: CreateUserRequest):
