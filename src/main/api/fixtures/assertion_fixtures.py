@@ -183,3 +183,45 @@ def check_name_change(request: pytest.FixtureRequest):
         f"Expected name={new_name}, but got {actual_name}."
     )
 
+@pytest.fixture(autouse=True, scope="function")
+def check_transactions_change(request: pytest.FixtureRequest):
+    mark = request.node.get_closest_marker("check_transactions_change")
+    if not mark:
+        yield
+        return
+
+    account_source = mark.kwargs.get("account_source")
+    user_source = mark.kwargs.get("user_source", "user_request")
+
+
+    delta = int(mark.kwargs.get("delta", 0))
+
+    if request.node.get_closest_marker("user_session") is not None:
+        try:
+            request.getfixturevalue("user_session_extension")
+        except Exception:
+            # In non-UI contexts this fixture may not exist; ignore.
+            pass
+
+    api_manager: ApiManager = request.getfixturevalue("api_manager")
+    user_request: CreateUserRequest = _resolve_source(request, user_source)
+    account = _resolve_source(request, account_source)
+
+    before = api_manager.manage_user_accounts_steps.get_transactions(
+        user_request,
+        account.id,
+    )
+
+    yield
+
+    after = api_manager.manage_user_accounts_steps.get_transactions(
+        user_request,
+        account.id,
+    )
+
+    actual_delta = len(after) - len(before)
+
+    assert actual_delta == delta, (
+        f"Expected transactions delta={delta}, but got {actual_delta}. "
+        f"before={len(before)}, after={len(after)}, account_id={account.id}"
+    )

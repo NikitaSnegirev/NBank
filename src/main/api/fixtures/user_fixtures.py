@@ -44,6 +44,11 @@ def user_request(user_factory):
 def update_profile_request() -> UpdateProfileRequest:
     return RandomModelGenerator.generate(UpdateProfileRequest)
 
+@pytest.fixture(scope="function")
+def user_account(api_manager: ApiManager, user_request: CreateUserRequest):
+    return api_manager.user_steps.create_account(user_request)
+
+
 @pytest.fixture
 def created_account_factory(api_manager: ApiManager, user_factory):
     def _create_account(balance: float = 0, user: CreateUserRequest | None = None):

@@ -10,6 +10,7 @@ from src.main.api.specs.response_specs import ResponseError
 
 @pytest.mark.api
 class TestDeposit:
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=1)
     @pytest.mark.parametrize(
         argnames='balance',
         argvalues=[
@@ -18,21 +19,21 @@ class TestDeposit:
             RandomData.get_random_number_float(1, 500000)
         ]
     )
-    @pytest.mark.usefixtures("user_request", 'api_manager')
-    def test_deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float):
-        account = api_manager.user_steps.create_account(user_request)
-        deposit = api_manager.manage_user_accounts_steps.deposit(user_request, account.id, balance)
+    @pytest.mark.usefixtures("user_request", 'api_manager', 'user_account')
+    def test_deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, user_account):
+        deposit = api_manager.manage_user_accounts_steps.deposit(user_request, user_account.id, balance)
         transaction = deposit.transactions[0]
 
         assert deposit.balance == balance
         assert transaction.amount == balance
         assert transaction.type == TransactionType.DEPOSIT
-        assert transaction.relatedAccountId == account.id
+        assert transaction.relatedAccountId == user_account.id
 
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, account.id)
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, user_account.id)
 
         assert account_transactions[0].amount == transaction.amount
 
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     @pytest.mark.parametrize(
         argnames='balance, error_text',
         argvalues=[
@@ -42,12 +43,9 @@ class TestDeposit:
             (-1, ResponseError.MIN_DEPOSIT_AMOUNT),
         ]
     )
-    @pytest.mark.usefixtures("user_request", 'api_manager')
-    def test_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: ResponseError ):
-        account = api_manager.user_steps.create_account(user_request)
-        api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, account.id, balance, error_text)
-
-        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
+    @pytest.mark.usefixtures("user_request", 'api_manager', 'user_account')
+    def test_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: ResponseError, user_account):
+        api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, user_account.id, balance, error_text)
 
     @pytest.mark.usefixtures("user_request", 'api_manager')
     def test_deposit_another_user_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest):
@@ -62,9 +60,7 @@ class TestDeposit:
         TransactionAssertions.has_no_transactions(api_manager, user_1, user_1_account.id)
         TransactionAssertions.has_no_transactions(api_manager, user_2, user_2_account.id)
 
-    @pytest.mark.usefixtures("user_request", 'api_manager')
-    def test_deposit_non_exist_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest):
-        account = api_manager.user_steps.create_account(user_request)
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
+    @pytest.mark.usefixtures("user_request", 'api_manager', 'user_account')
+    def test_deposit_non_exist_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest, user_account):
         api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, 0, 100, ResponseError.UNAUTHORIZED_ACCESS_TO_ACCOUNT)
-
-        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
