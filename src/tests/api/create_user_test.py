@@ -2,7 +2,6 @@ import pytest
 
 from src.main.api.classes.api_manager import ApiManager
 from src.main.api.generators.random_data import RandomData
-from src.main.api.generators.random_model_generator import RandomModelGenerator
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.role import Role
 from src.main.api.specs.response_specs import ResponseError
