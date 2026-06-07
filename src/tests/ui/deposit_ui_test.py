@@ -22,14 +22,13 @@ class TestDeposit:
             user_account,
             amount: str = str(RandomData.get_random_number_float(1, 500000)),
     ):
-        dashboard_page = UserDashboard(page).open()
-        expect(dashboard_page.welcome_text).to_be_visible()
-
-        deposit_page = dashboard_page.deposit_money()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.select_account(str(user_account.id))
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(
+        UserDashboard(page).open() \
+        .check_page_is_visible() \
+        .deposit_money() \
+        .check_page_is_visible() \
+        .select_account(str(user_account.id)) \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(
             successfully_deposited(amount, user_account.accountNumber)
         )
 
@@ -54,11 +53,11 @@ class TestDeposit:
             amount: str,
             error_text: str
     ):
-        deposit_page = DepositMoney(page).open()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.select_account(str(user_account.id))
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(error_text)
+        (DepositMoney(page).open() \
+        .check_page_is_visible() \
+        .select_account(str(user_account.id))) \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(error_text)
 
     @pytest.mark.user_session(1)
     @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
@@ -70,7 +69,7 @@ class TestDeposit:
             user_account,
             amount: str = str(RandomData.get_random_number_float(1, 500000))
     ):
-        deposit_page = DepositMoney(page).open()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(BankAlert.ACCOUNT_NOT_SELECTED_DEPOSIT)
+        DepositMoney(page).open() \
+        .check_page_is_visible() \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(BankAlert.ACCOUNT_NOT_SELECTED_DEPOSIT)

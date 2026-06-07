@@ -1,5 +1,7 @@
 from time import sleep
 
+from playwright.sync_api import expect
+
 from src.main.ui.pages.base_page import BasePage
 
 
@@ -25,6 +27,10 @@ class EditProfile(BasePage):
     def save_changes_click_and_check_msg(self, expected_alert: str):
         self.check_alert_message_and_accept(expected_alert)
         self.save_changes.click()
+        return self
+
+    def check_page_is_visible(self):
+        expect(self.edit_profile_header).to_be_visible()
         return self
 
     def url(self):
