@@ -1,3 +1,5 @@
+from playwright.sync_api import expect
+
 from src.main.ui.pages.base_page import BasePage
 
 
@@ -50,6 +52,10 @@ class MakeTransfer(BasePage):
     def send_transfer_and_check_msg(self, expected_alert: str):
         self.check_alert_message_and_accept(expected_alert)
         self.send_transfer_button.click()
+        return self
+
+    def check_page_is_visible(self):
+        expect(self.make_transfer_header).to_be_visible()
         return self
 
     def url(self):
