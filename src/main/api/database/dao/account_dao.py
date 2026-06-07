@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from dataclasses import dataclass
 
 
@@ -13,3 +14,6 @@ class AccountDao:
     id: int
     account_number: str
     balance: float
+    customer_id: int
+    created_at: datetime
+    updated_at: datetime
