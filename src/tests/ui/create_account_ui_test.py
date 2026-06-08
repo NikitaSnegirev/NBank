@@ -8,6 +8,7 @@ from src.main.ui.pages.bank_alert import BankAlert
 
 
 @pytest.mark.ui
+@pytest.mark.usefixtures("admin_session_autologin", "browser_match_guard")
 class TestCreateAccount:
     @pytest.mark.user_session(10)
     @pytest.mark.check_accounts_change(delta=1)

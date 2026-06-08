@@ -4,3 +4,4 @@ pedantic
 faker
 rstr
 playwright
+pytest-xdist
