@@ -5,9 +5,16 @@ from typing import List
 from src.main.api.models.create_account_response import CreateAccountResponse
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.create_user_response import CreateUserResponse
+from src.main.api.models.get_profile_response import GetProfileResponse
+from src.main.api.models.deposit_request import DepositRequest
+from src.main.api.models.deposit_response import DepositResponse, TransactionResponse
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.models.base_model import BaseModel
+from src.main.api.models.transfer_request import TransferRequest
+from src.main.api.models.transfer_response import TransferResponse
+from src.main.api.models.update_profile_request import UpdateProfileRequest
+from src.main.api.models.update_profile_response import UpdateProfileResponse
 
 
 @dataclass(frozen=True)
@@ -52,4 +59,34 @@ class Endpoint(Enum):
         url='/customer/accounts',
         request_model=None,
         response_model=List[CreateAccountResponse]
+    )
+
+    ACCOUNTS_DEPOSIT = EndpointConfig(
+        url='/accounts/deposit',
+        request_model=DepositRequest,
+        response_model=DepositResponse
+    )
+
+    TRANSFER = EndpointConfig(
+        url='/accounts/transfer',
+        request_model=TransferRequest,
+        response_model=TransferResponse
+    )
+
+    GET_TRANSACTIONS= EndpointConfig(
+        url='/accounts',
+        request_model=None,
+        response_model=list[TransactionResponse]
+    )
+
+    CUSTOMER_UPDATE_PROFILE = EndpointConfig(
+        url='/customer/profile',
+        request_model=UpdateProfileRequest,
+        response_model=UpdateProfileResponse
+    )
+
+    CUSTOMER_GET_PROFILE = EndpointConfig(
+        url='/customer/profile',
+        request_model=None,
+        response_model=GetProfileResponse
     )

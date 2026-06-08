@@ -1,7 +1,18 @@
-from typing import Callable
+from enum import Enum
 from http import HTTPStatus
 from typing import Callable
+
 from requests import Response
+
+
+class ResponseError(str, Enum):
+    MAX_TRANSFER_AMOUNT = "Transfer amount cannot exceed 10000"
+    MIN_TRANSFER_AMOUNT = "Transfer amount must be at least 0.01"
+    INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts"
+    UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account"
+    NAME = "Name must contain two words with letters only"
+    DEPOSIT_OVER_LIMIT = "Deposit amount cannot exceed 5000"
+    MIN_DEPOSIT_AMOUNT = "Deposit amount must be at least 0.01"
 
 
 class ResponseSpecs:
@@ -39,4 +50,44 @@ class ResponseSpecs:
             assert error_value in actual_value, (
                 f"Expected error field '{error_key}' to be '{error_value}', but got '{actual_value}'."
             )
+        return check
+
+    @staticmethod
+    def request_returns_bad_request_with_text(
+            error_text: ResponseError
+    ) -> Callable[[Response], None]:
+        def check(response: Response):
+            expected_statuses = [HTTPStatus.BAD_REQUEST, HTTPStatus.FORBIDDEN]
+            assert response.status_code in expected_statuses, (
+                f"Expected status {expected_statuses}, got {response.status_code}. Response: {response.text}"
+            )
+            assert error_text.value in response.text, (
+                f"Expected response text to contain '{error_text.value}', but got '{response.text}'."
+            )
+        return check
+
+    @staticmethod
+    def profile_updated_successfully():
+        def check(response: Response):
+            check_ok = ResponseSpecs.request_returns_ok()
+            check_ok(response)
+
+            actual_message = response.json().get("message")
+            assert actual_message == "Profile updated successfully", (
+                f"Expected message 'Profile updated successfully', but got '{actual_message}'."
+            )
+
+        return check
+
+    @staticmethod
+    def transfer_successfully():
+        def check(response: Response):
+            check_ok = ResponseSpecs.request_returns_ok()
+            check_ok(response)
+
+            actual_message = response.json().get("message")
+            assert actual_message == "Transfer successful", (
+                f"Expected message 'Transfer successful', but got '{actual_message}'."
+            )
+
         return check

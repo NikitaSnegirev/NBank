@@ -1,5 +1,5 @@
-from http import HTTPStatus
-from typing import Optional, TypeVar, Union
+from typing import Optional, TypeVar
+
 import requests
 
 from src.main.api.configs.config import Config
@@ -39,6 +39,25 @@ class CrudRequester(HttpRequest, CrudEndpointInterface):
     def delete(self, id: int) -> requests.Response:
         response = requests.delete(
             url=f'{self.base_url}{self.endpoint.value.url}/{id}',
+            headers=self.request_spec
+        )
+        self.response_spec(response)
+        return response
+
+    def put(self, model: Optional[T] = None) -> requests.Response:
+        body = model.model_dump() if model is not None else ''
+
+        response = requests.put(
+            url=f'{self.base_url}{self.endpoint.value.url}',
+            headers=self.request_spec,
+            json=body
+        )
+        self.response_spec(response)
+        return response
+
+    def get_transactions(self, account_id: int):
+        response = requests.get(
+            url=f'{self.base_url}{self.endpoint.value.url}/{account_id}/transactions',
             headers=self.request_spec
         )
         self.response_spec(response)

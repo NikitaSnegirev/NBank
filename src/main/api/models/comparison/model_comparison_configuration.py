@@ -32,7 +32,7 @@ class ModelComparisonConfigLoader:
         self._load_config(config_file)
 
     def _load_config(self, config_file: str):
-        path = Path(__file__).parents[5] / 'resources' / f'{config_file}'
+        path = Path(f'resources/{config_file}')
 
         if not os.path.exists(path):
             raise FileNotFoundError(f'Config file not found: {config_file}')

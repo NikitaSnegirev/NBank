@@ -29,3 +29,11 @@ class ValidatedCrudRequester(HttpRequest):
     def update(self, id: int): ...
 
     def delete(self, id: int): ...
+
+    def put(self, model: Optional[T] = None):
+        response = self.crud_requester.put(model)
+        return self._adapter.validate_python(response.json())
+
+    def get_transactions(self, account_id: int):
+        response = self.crud_requester.get_transactions(account_id)
+        return self._adapter.validate_python(response.json())
