@@ -13,6 +13,9 @@ class ResponseError(str, Enum):
     NAME = "Name must contain two words with letters only"
     DEPOSIT_OVER_LIMIT = "Deposit amount cannot exceed 5000"
     MIN_DEPOSIT_AMOUNT = "Deposit amount must be at least 0.01"
+    USERNAME_CANNOT_BE_BLANK = "Username cannot be blank"
+    USERNAME_MUST_BY_BETWEEN_3_AND_5_CHARACTERS = "Username must be between 3 and 15 characters"
+    USERNAME_MUST_CONTAIN_ONLY_ALLOWED_SYMBOLS = "Username must contain only letters, digits, dashes, underscores, and dots"
 
 
 class ResponseSpecs:

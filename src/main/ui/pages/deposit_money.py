@@ -1,4 +1,4 @@
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
 
 from src.main.ui.pages.base_page import BasePage
 
@@ -21,7 +21,6 @@ class DepositMoney(BasePage):
     def deposit_button(self):
         return self.page.get_by_role("button", name="💵 Deposit")
 
-
     def select_account(self, number_account: str):
         self.account_selector.select_option(number_account)
         return self
@@ -33,6 +32,10 @@ class DepositMoney(BasePage):
     def deposit_click_and_check_msg(self, expected_alert: str):
         self.check_alert_message_and_accept(expected_alert)
         self.deposit_button.click()
+        return self
+
+    def check_page_is_visible(self):
+        expect(self.deposit_money_header).to_be_visible()
         return self
 
     def url(self):

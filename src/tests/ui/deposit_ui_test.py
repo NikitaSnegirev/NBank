@@ -13,27 +13,26 @@ from src.main.ui.pages.user_dashboard import UserDashboard
 @pytest.mark.ui
 class TestDeposit:
     @pytest.mark.user_session(1)
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=1)
     def test_user_can_deposit(
             self,
             api_manager: ApiManager,
             page: Page,
             user_request: CreateUserRequest,
-            amount: str = str(RandomData.get_random_number_float(1, 500000))
+            user_account,
+            amount: str = str(RandomData.get_random_number_float(1, 500000)),
     ):
-        account = api_manager.user_steps.create_account(user_request)
-
-        dashboard_page = UserDashboard(page).open()
-        expect(dashboard_page.welcome_text).to_be_visible()
-
-        deposit_page = dashboard_page.deposit_money()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.select_account(str(account.id))
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(
-            successfully_deposited(amount, account.accountNumber)
+        UserDashboard(page).open() \
+        .check_page_is_visible() \
+        .deposit_money() \
+        .check_page_is_visible() \
+        .select_account(str(user_account.id)) \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(
+            successfully_deposited(amount, user_account.accountNumber)
         )
 
-        transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request,account.id)
+        transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request,user_account.id)
         assert str(transactions[0].amount) == amount
 
     @pytest.mark.parametrize(
@@ -44,33 +43,33 @@ class TestDeposit:
         ]
     )
     @pytest.mark.user_session(1)
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     def test_deposit_incorrect_balance(
             self,
             api_manager: ApiManager,
             page: Page,
             user_request: CreateUserRequest,
+            user_account,
             amount: str,
             error_text: str
     ):
-        account = api_manager.user_steps.create_account(user_request)
-
-        deposit_page = DepositMoney(page).open()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.select_account(str(account.id))
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(error_text)
-
-        TransactionAssertions.has_no_transactions(api_manager, user_request, account.id)
+        (DepositMoney(page).open() \
+        .check_page_is_visible() \
+        .select_account(str(user_account.id))) \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(error_text)
 
     @pytest.mark.user_session(1)
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     def test_account_not_selected_deposit(
             self,
             api_manager: ApiManager,
             page: Page,
             user_request: CreateUserRequest,
+            user_account,
             amount: str = str(RandomData.get_random_number_float(1, 500000))
     ):
-        deposit_page = DepositMoney(page).open()
-        expect(deposit_page.deposit_money_header).to_be_visible()
-        deposit_page.enter_amount(amount)
-        deposit_page.deposit_click_and_check_msg(BankAlert.ACCOUNT_NOT_SELECTED_DEPOSIT)
+        DepositMoney(page).open() \
+        .check_page_is_visible() \
+        .enter_amount(amount) \
+        .deposit_click_and_check_msg(BankAlert.ACCOUNT_NOT_SELECTED_DEPOSIT)

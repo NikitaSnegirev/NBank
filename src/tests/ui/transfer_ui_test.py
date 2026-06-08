@@ -29,20 +29,19 @@ class TestTransfer:
         sender, sender_account = created_account_factory(user=sender, balance=10000)
         receiver, receiver_account = created_account_factory(user=receiver)
 
-        dashboard_page = UserDashboard(page).open()
-        expect(dashboard_page.welcome_text).to_be_visible()
-
-        make_transfer = dashboard_page.make_transfer()
-        expect(make_transfer.make_transfer_header).to_be_visible()
-        make_transfer.select_account(str(sender_account.id))
-        make_transfer.recipient_name(receiver.username)
-        make_transfer.recipient_account_number(str(receiver_account.accountNumber))
-        make_transfer.enter_amount(amount)
-        make_transfer.confirm_check_click()
-        make_transfer.send_transfer_and_check_msg(
+        UserDashboard(page).open() \
+        .check_page_is_visible() \
+        .make_transfer() \
+        .check_page_is_visible() \
+        .select_account(str(sender_account.id)) \
+        .recipient_name(receiver.username) \
+        .recipient_account_number(str(receiver_account.accountNumber)) \
+        .enter_amount(amount) \
+        .confirm_check_click() \
+        .send_transfer_and_check_msg(
             successfully_transferred(amount, str(receiver_account.accountNumber))
-        )
-        make_transfer.page.keyboard.press('F5') # без перезагрузки страницы получаем старые данные
+        ) \
+        .page.keyboard.press('F5') # без перезагрузки страницы получаем старые данные
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
         account_transactions_receiver = api_manager.manage_user_accounts_steps.get_transactions(receiver, receiver_account.id)
@@ -82,14 +81,14 @@ class TestTransfer:
         sender, sender_account = created_account_factory(user=sender, balance=10000)
         receiver, receiver_account = created_account_factory(user=receiver)
 
-        make_transfer = MakeTransfer(page).open()
-        expect(make_transfer.make_transfer_header).to_be_visible()
-        make_transfer.select_account(str(sender_account.id))
-        make_transfer.recipient_name(receiver.username)
-        make_transfer.recipient_account_number(str(receiver_account.accountNumber))
-        make_transfer.enter_amount(amount)
-        make_transfer.confirm_check_click()
-        make_transfer.send_transfer_and_check_msg(error_text)
+        MakeTransfer(page).open() \
+        .check_page_is_visible() \
+        .select_account(str(sender_account.id)) \
+        .recipient_name(receiver.username) \
+        .recipient_account_number(str(receiver_account.accountNumber)) \
+        .enter_amount(amount) \
+        .confirm_check_click() \
+        .send_transfer_and_check_msg(error_text)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
@@ -112,14 +111,14 @@ class TestTransfer:
         sender, sender_account = created_account_factory(user=sender, balance=2000)
         receiver, receiver_account = created_account_factory(user=receiver)
 
-        make_transfer = MakeTransfer(page).open()
-        expect(make_transfer.make_transfer_header).to_be_visible()
-        make_transfer.select_account(str(sender_account.id))
-        make_transfer.recipient_name(receiver.username)
-        make_transfer.recipient_account_number(str(receiver_account.accountNumber))
-        make_transfer.enter_amount("3000")
-        make_transfer.confirm_check_click()
-        make_transfer.send_transfer_and_check_msg(BankAlert.INSUFFICIENT_FUNDS_OR_INVALID_ACCOUNTS_TRANSFER)
+        MakeTransfer(page).open() \
+        .check_page_is_visible() \
+        .select_account(str(sender_account.id)) \
+        .recipient_name(receiver.username) \
+        .recipient_account_number(str(receiver_account.accountNumber)) \
+        .enter_amount("3000") \
+        .confirm_check_click() \
+        .send_transfer_and_check_msg(BankAlert.INSUFFICIENT_FUNDS_OR_INVALID_ACCOUNTS_TRANSFER)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 
@@ -139,9 +138,9 @@ class TestTransfer:
         sender = SessionStorage.get_user(0)
         sender, sender_account = created_account_factory(user=sender)
 
-        make_transfer = MakeTransfer(page).open()
-        expect(make_transfer.make_transfer_header).to_be_visible()
-        make_transfer.send_transfer_and_check_msg(BankAlert.FILL_ALL_FIELDS_TRANSFER)
+        MakeTransfer(page).open() \
+        .check_page_is_visible() \
+        .send_transfer_and_check_msg(BankAlert.FILL_ALL_FIELDS_TRANSFER)
 
         account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
 

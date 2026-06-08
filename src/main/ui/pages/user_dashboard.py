@@ -1,3 +1,5 @@
+from playwright.sync_api import expect
+
 from src.main.ui.pages.base_page import BasePage
 from src.main.ui.pages.deposit_money import DepositMoney
 from src.main.ui.pages.make_transfer import MakeTransfer
@@ -43,3 +45,7 @@ class UserDashboard(BasePage):
     def profile(self):
         self.profile_button.click()
         return self.get_page(EditProfile)
+
+    def check_page_is_visible(self):
+        expect(self.welcome_text).to_be_visible()
+        return self

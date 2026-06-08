@@ -25,7 +25,7 @@ def user_session_extension(request, page: Page, user_factory):
 
     SessionStorage.clear() # очистка после каждого теста
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def admin_session_autologin(
     request: pytest.FixtureRequest,
     page: Page,
@@ -37,7 +37,7 @@ def admin_session_autologin(
 
     LoginPage(page).auth_as_user(admin_user_request)
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def browser_match_guard(request):
     mark = request.node.get_closest_marker("browsers")
     if not mark:

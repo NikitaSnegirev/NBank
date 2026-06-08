@@ -29,5 +29,9 @@ class EditProfile(BasePage):
         self.save_changes.click()
         return self
 
+    def check_page_is_visible(self):
+        expect(self.edit_profile_header).to_be_visible()
+        return self
+
     def url(self):
         return "/edit-profile"
