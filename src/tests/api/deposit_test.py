@@ -1,8 +1,9 @@
 import pytest
 
-from src.main.api.assertions.transaction_assertions import TransactionAssertions
+from src.main.api.assertions.db_assertions import DbAssertions
 from src.main.api.classes.api_manager import ApiManager
 from src.main.api.generators.random_data import RandomData
+from src.main.api.models.comparison.dao_and_model_assertions import DaoAndModelAssertions
 from src.main.api.models.create_user_request import CreateUserRequest
 from src.main.api.models.transaction_type import TransactionType
 from src.main.api.specs.response_specs import ResponseError
@@ -33,6 +34,9 @@ class TestDeposit:
 
         assert account_transactions[0].amount == transaction.amount
 
+        account_dao = api_manager.database_steps.get_transactions_by_related_account_id(user_account.id)
+        DaoAndModelAssertions.assert_that(transaction, account_dao).match()
+
     @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     @pytest.mark.parametrize(
         argnames='balance, error_text',
@@ -47,6 +51,9 @@ class TestDeposit:
     def test_deposit_incorrect_balance(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, error_text: ResponseError, user_account):
         api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, user_account.id, balance, error_text)
 
+        DbAssertions.has_no_transactions_by_related_account_id(api_manager, user_account.id)
+
+    @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     @pytest.mark.usefixtures("user_request", 'api_manager')
     def test_deposit_another_user_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest):
         user_1 = user_factory()
@@ -57,10 +64,11 @@ class TestDeposit:
 
         api_manager.manage_user_accounts_steps.deposit_bad_request(user_1, user_2_account.id, 100, ResponseError.UNAUTHORIZED_ACCESS_TO_ACCOUNT)
 
-        TransactionAssertions.has_no_transactions(api_manager, user_1, user_1_account.id)
-        TransactionAssertions.has_no_transactions(api_manager, user_2, user_2_account.id)
+        DbAssertions.has_no_transactions_by_related_account_id(api_manager, user_1_account.id)
 
     @pytest.mark.check_transactions_change(account_source="user_account", delta=0)
     @pytest.mark.usefixtures("user_request", 'api_manager', 'user_account')
     def test_deposit_non_exist_id(self, api_manager: ApiManager, user_factory, user_request: CreateUserRequest, user_account):
         api_manager.manage_user_accounts_steps.deposit_bad_request(user_request, 0, 100, ResponseError.UNAUTHORIZED_ACCESS_TO_ACCOUNT)
+
+        DbAssertions.has_no_transactions_by_related_account_id(api_manager, user_account.id)
