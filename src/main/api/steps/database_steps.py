@@ -50,12 +50,12 @@ class DataBaseSteps:
         )
 
     @staticmethod
-    def get_transactions_by_related_account_id(related_account_id: int) -> TransactionsDao:
+    def get_transactions_by_transaction_id(transaction_id: int) -> TransactionsDao:
         return (
             DBRequest.builder()
             .request_type(RequestType.SELECT)
             .table("transactions")
-            .where(Condition.equal_to("related_account_id", related_account_id))
+            .where(Condition.equal_to("id", transaction_id))
             .extract_as(TransactionsDao)
         )
 

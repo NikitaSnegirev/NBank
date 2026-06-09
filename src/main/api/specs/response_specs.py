@@ -7,7 +7,7 @@ from requests import Response
 
 class ResponseError(str, Enum):
     MAX_TRANSFER_AMOUNT = "Transfer amount cannot exceed 10000"
-    MIN_TRANSFER_AMOUNT = "Transfer amount must be at least 0.01"
+    MIN_TRANSFER_AMOUNT = "Invalid transfer: insufficient funds or invalid accounts"
     INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts"
     UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account"
     NAME = "Name must contain two words with letters only"
