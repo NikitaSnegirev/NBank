@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from src.main.api.database.dao.customer_dao import CustomerDao
 from src.main.api.database.dao.transactions_dao import TransactionsDao
 from src.main.api.database.db_client import Condition, DBRequest, RequestType
 from src.main.api.database.dao.user_dao import UserDao
@@ -67,4 +68,14 @@ class DataBaseSteps:
             .table("transactions")
             .where(Condition.equal_to("related_account_id", related_account_id))
             .extract_optional_as(TransactionsDao)
+        )
+
+    @staticmethod
+    def get_customer_by_customer_id(customer_id: int) -> CustomerDao:
+        return (
+            DBRequest.builder()
+            .request_type(RequestType.SELECT)
+            .table("customers")
+            .where(Condition.equal_to("id", customer_id))
+            .extract_as(CustomerDao)
         )
