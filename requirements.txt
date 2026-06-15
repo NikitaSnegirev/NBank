@@ -4,3 +4,5 @@ pedantic
 faker
 rstr
 playwright
+pytest-xdist
+psycopg[binary]

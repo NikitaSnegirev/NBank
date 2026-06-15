@@ -7,12 +7,15 @@ from requests import Response
 
 class ResponseError(str, Enum):
     MAX_TRANSFER_AMOUNT = "Transfer amount cannot exceed 10000"
-    MIN_TRANSFER_AMOUNT = "Transfer amount must be at least 0.01"
+    MIN_TRANSFER_AMOUNT = "Invalid transfer: insufficient funds or invalid accounts"
     INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts"
     UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account"
     NAME = "Name must contain two words with letters only"
-    DEPOSIT_OVER_LIMIT = "Deposit amount cannot exceed 5000"
-    MIN_DEPOSIT_AMOUNT = "Deposit amount must be at least 0.01"
+    DEPOSIT_OVER_LIMIT = "Deposit amount exceeds the 5000 limit"
+    MIN_DEPOSIT_AMOUNT = "Invalid account or amount"
+    USERNAME_CANNOT_BE_BLANK = "Username cannot be blank"
+    USERNAME_MUST_BY_BETWEEN_3_AND_5_CHARACTERS = "Username must be between 3 and 15 characters"
+    USERNAME_MUST_CONTAIN_ONLY_ALLOWED_SYMBOLS = "Username must contain only letters, digits, dashes, underscores, and dots"
 
 
 class ResponseSpecs:

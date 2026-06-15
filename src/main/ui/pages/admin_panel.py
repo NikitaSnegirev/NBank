@@ -25,13 +25,21 @@ class AdminPanel(BasePage):
         return self
 
     def get_all_users_locator(self) -> Locator:
-        return self.page.locator(".card.shadow-custom:has(:has-text('All Users')) li")
+        return self.page.locator(".card.shadow-custom:has(:has-text('All Users'))")
 
     def get_all_users(self) -> List[UserBadge]:
         return self._generate_page_elements(self.get_all_users_locator(), UserBadge)
 
     def wait_for_username(self, username: str):
         expect(self.get_all_users_locator()).to_contain_text([username])
+        return self
+
+    def check_page_is_visible(self):
+        expect(self.admin_panel_text).to_be_visible()
+        return self
+
+    def check_user_is_visible(self, username: str):
+        assert not any(u.username == username for u in self.get_all_users())
         return self
 
 

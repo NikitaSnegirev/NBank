@@ -53,5 +53,8 @@ class BasePage(ABC):
         self.page.evaluate('token => localStorage.setItem("authToken", token)', auth_token)
 
     def _generate_page_elements(self, elements: Locator, constructor: Callable[[Locator], T]) -> List[T]:
+        count = elements.count()
+        if count == 0:
+            return []
         elements.first.wait_for(state="attached", timeout=10_000)
-        return [constructor(elements.nth(i)) for i in range(elements.count())]
+        return [constructor(elements.nth(i)) for i in range(count)]
