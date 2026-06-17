@@ -15,4 +15,5 @@ class DepositResponse(BaseModel):
     id: int
     accountNumber: str
     balance: float
-    transactions: list[TransactionResponse]
+    depositAmount: float
+    transactionId: int

@@ -38,9 +38,12 @@ class ModelComparator:
 
     @staticmethod
     def _values_equal(left: Any, right: Any) -> bool:
-        if isinstance(left, (int, float, Decimal)) and isinstance(right, (int, float, Decimal)):
-            return Decimal(str(left)) == Decimal(str(right))
-
+        # Handle DB Decimal vs API float/int comparisons
+        if isinstance(left, Decimal) or isinstance(right, Decimal):
+            try:
+                return Decimal(str(left)) == Decimal(str(right))
+            except Exception:
+                return str(left) == str(right)
         return str(left) == str(right)
 
     def _get_field_value(obj: Any, field_name: str):

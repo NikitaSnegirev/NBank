@@ -91,3 +91,9 @@ class Endpoint(Enum):
         request_model=None,
         response_model=GetProfileResponse
     )
+
+    TRANSFER_WITH_FRAUD_CHECK = EndpointConfig(
+        url='/accounts/transfer-with-fraud-check',
+        request_model=TransferRequest,
+        response_model=TransferResponse
+    )
