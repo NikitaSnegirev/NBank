@@ -9,9 +9,10 @@ from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.models.transfer_request import TransferRequest
 from src.main.api.models.transfer_response import TransferResponse
 from src.main.api.requests.skeleton.endpoint import Endpoint
+from src.main.api.requests.skeleton.requesters.crud_requester import CrudRequester
 from src.main.api.requests.skeleton.requesters.validated_crud_requester import ValidatedCrudRequester
 from src.main.api.specs.request_specs import RequestSpecs
-from src.main.api.specs.response_specs import ResponseSpecs
+from src.main.api.specs.response_specs import ResponseError, ResponseSpecs
 from src.main.api.steps.base_steps import BaseSteps
 
 
@@ -66,3 +67,15 @@ class UserSteps(BaseSteps):
             ResponseSpecs.request_returns_ok()
         ).post(transfer_request)
         return transfer_response
+
+    def transfer_with_fraud_check_invalid_data(
+            self,
+            user_request: CreateUserRequest,
+            transfer_request: TransferRequest,
+            error_text: ResponseError | str,
+    ):
+        CrudRequester(
+            RequestSpecs.auth_as_user(user_request.username, user_request.password),
+            Endpoint.TRANSFER_WITH_FRAUD_CHECK,
+            ResponseSpecs.request_returns_bad_request_with_text(error_text)
+        ).post(transfer_request)
