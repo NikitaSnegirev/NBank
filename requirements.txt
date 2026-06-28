@@ -1,9 +1,10 @@
 pytest
 requests
-pedantic
-faker
+pydantic
+softest
 rstr
-playwright
+Faker
+allure-pytest
+pytest-playwright
 pytest-xdist
 psycopg[binary]
-allure-python-commons
