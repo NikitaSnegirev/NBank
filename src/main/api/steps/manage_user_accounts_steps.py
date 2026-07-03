@@ -16,8 +16,8 @@ class ManageUserAccountsSteps(BaseSteps):
 
     def deposit(self, user_request: CreateUserRequest, id: int, balance: int) -> DepositResponse:
         deposit_request = DepositRequest(
-            id=id,
-            balance=balance
+            accountId=id,
+            amount=balance,
         )
         deposit_response: DepositResponse = ValidatedCrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),
@@ -26,15 +26,15 @@ class ManageUserAccountsSteps(BaseSteps):
         ).post(deposit_request)
 
         ModelAssertions(deposit_request, deposit_response).match()
-        assert deposit_response.transactions
+        assert deposit_response.transactionId
 
         return deposit_response
 
 
     def deposit_bad_request(self, user_request: CreateUserRequest, id: int, balance: int, error_text: ResponseError):
         deposit_request = DepositRequest(
-            id=id,
-            balance=balance
+            accountId=id,
+            amount=balance,
         )
         CrudRequester(
             RequestSpecs.auth_as_user(user_request.username, user_request.password),

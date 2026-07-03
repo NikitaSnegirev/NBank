@@ -6,3 +6,4 @@ rstr
 playwright
 pytest-xdist
 psycopg[binary]
+allure-python-commons

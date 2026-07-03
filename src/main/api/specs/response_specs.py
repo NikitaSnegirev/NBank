@@ -9,6 +9,8 @@ class ResponseError(str, Enum):
     MAX_TRANSFER_AMOUNT = "Transfer amount cannot exceed 10000"
     MIN_TRANSFER_AMOUNT = "Invalid transfer: insufficient funds or invalid accounts"
     INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts"
+    INVALID_ACCOUNTS_OR_AMOUNT = "Invalid accounts or amount"
+    INSUFFICIENT_FUNDS = "Insufficient funds"
     UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account"
     NAME = "Name must contain two words with letters only"
     DEPOSIT_OVER_LIMIT = "Deposit amount exceeds the 5000 limit"
@@ -57,15 +59,17 @@ class ResponseSpecs:
 
     @staticmethod
     def request_returns_bad_request_with_text(
-            error_text: ResponseError
+            error_text: ResponseError | str
     ) -> Callable[[Response], None]:
+        expected_error = error_text.value if isinstance(error_text, ResponseError) else str(error_text)
+
         def check(response: Response):
             expected_statuses = [HTTPStatus.BAD_REQUEST, HTTPStatus.FORBIDDEN]
             assert response.status_code in expected_statuses, (
                 f"Expected status {expected_statuses}, got {response.status_code}. Response: {response.text}"
             )
-            assert error_text.value in response.text, (
-                f"Expected response text to contain '{error_text.value}', but got '{response.text}'."
+            assert expected_error in response.text, (
+                f"Expected response text to contain '{expected_error}', but got '{response.text}'."
             )
         return check
 
