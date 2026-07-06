@@ -46,6 +46,13 @@ def fetch_one(sql: str, params: Optional[tuple[Any, ...]] = None) -> Optional[Di
             return dict(row) if row is not None else None
 
 
+def fetch_all(sql: str, params: Optional[tuple[Any, ...]] = None) -> list[Dict[str, Any]]:
+    with db_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params or ())
+            return [dict(row) for row in cur.fetchall()]
+
+
 @dataclass(frozen=True)
 class Condition:
     """

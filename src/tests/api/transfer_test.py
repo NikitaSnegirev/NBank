@@ -7,7 +7,6 @@ from src.main.api.assertions.transaction_assertions import TransactionAssertions
 from src.main.api.classes.api_manager import ApiManager
 from src.main.api.generators.random_data import RandomData
 from src.main.api.generators.random_model_generator import RandomModelGenerator
-from src.main.api.models.comparison.dao_and_model_assertions import DaoAndModelAssertions
 from src.main.api.models.transaction_type import TransactionType
 from src.main.api.models.transfer_request import TransferRequest
 from src.main.api.specs.response_specs import ResponseError
@@ -34,8 +33,8 @@ class TestTransfer:
         )
         api_manager.manage_user_accounts_steps.transfer(sender, transfer_request)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
-        account_transactions_receiver = api_manager.manage_user_accounts_steps.get_transactions(receiver, receiver_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
+        account_transactions_receiver = api_manager.database_steps.get_transactions_by_account_id(receiver_account.id)
 
         TransactionAssertions.has_transaction_with_amount(
             account_transactions_sender,
@@ -65,11 +64,10 @@ class TestTransfer:
         assert sender_account_dao.balance == Decimal(str(sender_account.balance)) - Decimal(str(amount))
         assert receiver_account_dao.balance == Decimal(str(receiver_account.balance)) + Decimal(str(amount))
 
-        out_transactions_dao = api_manager.database_steps.get_transactions_by_transaction_id(transfer_out_transaction.id)
-        DaoAndModelAssertions.assert_that(transfer_out_transaction, out_transactions_dao).match()
-
-        in_transactions_dao = api_manager.database_steps.get_transactions_by_transaction_id(transfer_in_transaction.id)
-        DaoAndModelAssertions.assert_that(transfer_in_transaction, in_transactions_dao).match()
+        assert transfer_out_transaction.account_id == sender_account.id
+        assert transfer_out_transaction.related_account_id == receiver_account.id
+        assert transfer_in_transaction.account_id == receiver_account.id
+        assert transfer_in_transaction.related_account_id == sender_account.id
 
     def test_transfer_between_one_users(self, api_manager: ApiManager, created_account_factory, amount=RandomData.get_random_number_float(1, 1000000)):
         sender, account_1 = created_account_factory(balance=10000)
@@ -84,8 +82,8 @@ class TestTransfer:
 
         api_manager.manage_user_accounts_steps.transfer(sender, transfer_request)
 
-        account_transactions_1 = api_manager.manage_user_accounts_steps.get_transactions(sender, account_1.id)
-        account_transactions_2 = api_manager.manage_user_accounts_steps.get_transactions(sender, account_2.id)
+        account_transactions_1 = api_manager.database_steps.get_transactions_by_account_id(account_1.id)
+        account_transactions_2 = api_manager.database_steps.get_transactions_by_account_id(account_2.id)
 
         TransactionAssertions.has_transaction_with_amount(
             account_transactions_1,
@@ -115,11 +113,10 @@ class TestTransfer:
         assert sender_account_dao.balance == Decimal(str(account_1.balance)) - Decimal(str(amount))
         assert receiver_account_dao.balance == Decimal(str(account_2.balance)) + Decimal(str(amount))
 
-        out_transactions_dao = api_manager.database_steps.get_transactions_by_transaction_id(transfer_out_transaction.id)
-        DaoAndModelAssertions.assert_that(transfer_out_transaction, out_transactions_dao).match()
-
-        in_transactions_dao = api_manager.database_steps.get_transactions_by_transaction_id(transfer_in_transaction.id)
-        DaoAndModelAssertions.assert_that(transfer_in_transaction, in_transactions_dao).match()
+        assert transfer_out_transaction.account_id == account_1.id
+        assert transfer_out_transaction.related_account_id == account_2.id
+        assert transfer_in_transaction.account_id == account_2.id
+        assert transfer_in_transaction.related_account_id == account_1.id
 
     @pytest.mark.parametrize(
         argnames='amount',
@@ -141,7 +138,7 @@ class TestTransfer:
 
         api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.MAX_TRANSFER_AMOUNT)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,
@@ -170,7 +167,7 @@ class TestTransfer:
 
         api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.MIN_TRANSFER_AMOUNT)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,
@@ -198,7 +195,7 @@ class TestTransfer:
 
         api_manager.manage_user_accounts_steps.transfer_bad_request(sender, transfer_request, ResponseError.INVALID_TRANSFER)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,

@@ -4,6 +4,7 @@ from src.main.ui.pages.base_page import BasePage
 from src.main.ui.pages.deposit_money import DepositMoney
 from src.main.ui.pages.make_transfer import MakeTransfer
 from src.main.ui.pages.edit_profile import EditProfile
+from src.main.ui.pages.bank_alert import BankAlert
 
 
 class UserDashboard(BasePage):
@@ -31,16 +32,17 @@ class UserDashboard(BasePage):
         return "/dashboard"
 
     def create_new_account(self):
-        self.create_new_account_button.click()
-        return self
+        return self.click_and_accept_alert(self.create_new_account_button, BankAlert.NEW_ACCOUNT_CREATED)
 
     def deposit_money(self):
         self.deposit_money_button.click()
         return self.get_page(DepositMoney)
 
     def make_transfer(self):
+        transfer_page = self.get_page(MakeTransfer)
+        transfer_page.normalize_customer_accounts_response()
         self.make_transfer_button.click()
-        return self.get_page(MakeTransfer)
+        return transfer_page
 
     def profile(self):
         self.profile_button.click()

@@ -227,17 +227,11 @@ def check_transactions_change(request: pytest.FixtureRequest):
     user_request: CreateUserRequest = _resolve_source(request, user_source)
     account = _resolve_source(request, account_source)
 
-    before = api_manager.manage_user_accounts_steps.get_transactions(
-        user_request,
-        account.id,
-    )
+    before = api_manager.database_steps.get_transactions_by_account_id(account.id)
 
     yield
 
-    after = api_manager.manage_user_accounts_steps.get_transactions(
-        user_request,
-        account.id,
-    )
+    after = api_manager.database_steps.get_transactions_by_account_id(account.id)
 
     actual_delta = len(after) - len(before)
 

@@ -43,8 +43,8 @@ class TestTransfer:
         ) \
         .page.keyboard.press('F5') # без перезагрузки страницы получаем старые данные
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
-        account_transactions_receiver = api_manager.manage_user_accounts_steps.get_transactions(receiver, receiver_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
+        account_transactions_receiver = api_manager.database_steps.get_transactions_by_account_id(receiver_account.id)
 
         TransactionAssertions.has_transaction_with_amount(
             account_transactions_sender,
@@ -90,7 +90,7 @@ class TestTransfer:
         .confirm_check_click() \
         .send_transfer_and_check_msg(error_text)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,
@@ -120,7 +120,7 @@ class TestTransfer:
         .confirm_check_click() \
         .send_transfer_and_check_msg(BankAlert.INSUFFICIENT_FUNDS_OR_INVALID_ACCOUNTS_TRANSFER)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,
@@ -142,7 +142,7 @@ class TestTransfer:
         .check_page_is_visible() \
         .send_transfer_and_check_msg(BankAlert.FILL_ALL_FIELDS_TRANSFER)
 
-        account_transactions_sender = api_manager.manage_user_accounts_steps.get_transactions(sender, sender_account.id)
+        account_transactions_sender = api_manager.database_steps.get_transactions_by_account_id(sender_account.id)
 
         TransactionAssertions.has_no_transaction_by_type(
             account_transactions_sender,

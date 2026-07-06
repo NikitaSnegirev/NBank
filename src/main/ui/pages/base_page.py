@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import time
 from typing import Type, TypeVar, Callable, List
 
 from playwright.sync_api import Page, Dialog, Locator
@@ -44,6 +45,24 @@ class BasePage(ABC):
             assert expected_text in d.message, f"Alert text mismatch: {d.message!r}"
             d.accept()
         self.page.once("dialog", _handler)
+        return self
+
+    def click_and_accept_alert(self: T, locator: Locator, expected_text: str) -> T:
+        messages: list[str] = []
+
+        def _handler(d: Dialog) -> None:
+            messages.append(d.message)
+            d.accept()
+
+        self.page.once("dialog", _handler)
+        locator.click()
+
+        deadline = time.monotonic() + 10
+        while not messages and time.monotonic() < deadline:
+            self.page.wait_for_timeout(100)
+
+        assert messages, f"Expected alert containing {expected_text!r}, but no alert appeared."
+        assert expected_text in messages[0], f"Alert text mismatch: {messages[0]!r}"
         return self
 
     def auth_as_user(self: T, user_request: CreateUserRequest) -> None:

@@ -4,7 +4,7 @@ from src.main.api.models.base_model import BaseModel
 
 
 class TransferResponse(BaseModel):
-    status: str
+    status: Optional[str] = None
     message: str
 
     amount: float

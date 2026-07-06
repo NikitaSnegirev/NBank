@@ -23,14 +23,14 @@ class TestDeposit:
     @pytest.mark.usefixtures("user_request", 'api_manager', 'user_account')
     def test_deposit(self, api_manager: ApiManager, user_request: CreateUserRequest, balance: float, user_account):
         deposit = api_manager.manage_user_accounts_steps.deposit(user_request, user_account.id, balance)
-        transaction = deposit.transactions[0]
+        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, user_account.id)
+        transaction = account_transactions[0]
 
         assert deposit.balance == balance
+        assert deposit.transactionId == transaction.id
         assert transaction.amount == balance
         assert transaction.type == TransactionType.DEPOSIT
         assert transaction.relatedAccountId == user_account.id
-
-        account_transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request, user_account.id)
 
         assert account_transactions[0].amount == transaction.amount
 

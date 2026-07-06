@@ -32,7 +32,7 @@ class TestDeposit:
             successfully_deposited(amount, user_account.accountNumber)
         )
 
-        transactions = api_manager.manage_user_accounts_steps.get_transactions(user_request,user_account.id)
+        transactions = api_manager.database_steps.get_transactions_by_account_id(user_account.id)
         assert str(transactions[0].amount) == amount
 
     @pytest.mark.parametrize(

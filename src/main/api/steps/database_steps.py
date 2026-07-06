@@ -4,7 +4,7 @@ from typing import Optional
 
 from src.main.api.database.dao.customer_dao import CustomerDao
 from src.main.api.database.dao.transactions_dao import TransactionsDao
-from src.main.api.database.db_client import Condition, DBRequest, RequestType
+from src.main.api.database.db_client import Condition, DBRequest, RequestType, fetch_all
 from src.main.api.database.dao.user_dao import UserDao
 from src.main.api.database.dao.account_dao import AccountDao
 
@@ -59,6 +59,18 @@ class DataBaseSteps:
             .where(Condition.equal_to("id", transaction_id))
             .extract_as(TransactionsDao)
         )
+
+    @staticmethod
+    def get_transactions_by_account_id(account_id: int) -> list[TransactionsDao]:
+        rows = fetch_all(
+            """
+            SELECT * FROM transactions
+            WHERE account_id = %s OR related_account_id = %s
+            ORDER BY id DESC
+            """,
+            (account_id, account_id),
+        )
+        return [TransactionsDao(**row) for row in rows]
 
     @staticmethod
     def find_transactions_by_related_account_id(related_account_id: int) -> Optional[TransactionsDao]:

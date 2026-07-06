@@ -33,12 +33,10 @@ def user_factory(api_manager: ApiManager):
 
 
 @pytest.fixture(scope='function')
-def user_request(user_factory):
-    try:
+def user_request(request: pytest.FixtureRequest, user_factory):
+    if request.node.get_closest_marker("user_session") is not None:
         return SessionStorage.get_user(0)
-    except Exception:
-        user = user_factory()
-        return user
+    return user_factory()
 
 @pytest.fixture(scope="function")
 def update_profile_request() -> UpdateProfileRequest:
