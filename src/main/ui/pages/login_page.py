@@ -14,4 +14,6 @@ class LoginPage(BasePage):
         self.page.get_by_placeholder("Username").fill(username)
         self.page.get_by_placeholder("Password").fill(password)
         self.login_button.click()
+        expected_path = "/admin" if username == "admin" else "/dashboard"
+        self.page.wait_for_url(f"**{expected_path}", timeout=10_000)
         return self
