@@ -59,7 +59,8 @@ jobs:
 
       - name: Start services
         env:
-          BACKEND_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_tag || 'with_database_with_fix' }}
+          BACKEND_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_tag || 'with_fraud_check_with_transfer_fix' }}
+          TEST_IMAGE: niko7645/nbank-tests:v1
         run: |
           export NBANK_BACKEND_IMAGE="nobugsme/nbank:${BACKEND_TAG}"
           docker compose -f infra/docker-compose/docker-compose.yaml up -d
