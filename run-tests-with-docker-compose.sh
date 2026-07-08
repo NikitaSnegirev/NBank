@@ -7,6 +7,19 @@ TEST_IMAGE="${TEST_IMAGE:-nbank-tests:v1}"
 
 APIBASEURL="http://localhost:4111"
 UIBASEURL="http://localhost:3000"
+FRAUD_MOCK_ADMIN_URL="${FRAUD_MOCK_ADMIN_URL:-http://localhost:8080/__admin/config}"
+
+resolve_workspace_dir() {
+  if [ -n "${WORKSPACE_DIR:-}" ]; then
+    echo "$WORKSPACE_DIR"
+  elif command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$(pwd)"
+  else
+    pwd
+  fi
+}
+
+WORKSPACE_DIR="$(resolve_workspace_dir)"
 
 cleanup() {
   exit_code=$?
@@ -63,13 +76,18 @@ echo
 echo "Запускаем API и UI тесты в контейнере..."
 echo "APIBASEURL=$APIBASEURL"
 echo "UIBASEURL=$UIBASEURL"
+echo "FRAUD_MOCK_ADMIN_URL=$FRAUD_MOCK_ADMIN_URL"
 echo "TEST_IMAGE=$TEST_IMAGE"
+echo "WORKSPACE_DIR=$WORKSPACE_DIR"
 
-docker run --rm \
+MSYS_NO_PATHCONV=1 docker run --rm \
   --network host \
+  -v "$WORKSPACE_DIR:/app" \
+  -w /app \
   -e APIBASEURL="$APIBASEURL" \
   -e UIBASEURL="$UIBASEURL" \
   -e UI_BASE_URL="$UIBASEURL" \
   -e PLAYWRIGHT_TEST_BASE_URL="$UIBASEURL" \
+  -e FRAUD_MOCK_ADMIN_URL="$FRAUD_MOCK_ADMIN_URL" \
   "$TEST_IMAGE" \
   pytest "$@"
