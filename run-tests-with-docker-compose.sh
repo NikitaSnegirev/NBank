@@ -69,4 +69,7 @@ docker run --rm \
   --network host \
   -e APIBASEURL="$APIBASEURL" \
   -e UIBASEURL="$UIBASEURL" \
-  "$TEST_IMAGE"
+  -e UI_BASE_URL="$UIBASEURL" \
+  -e PLAYWRIGHT_TEST_BASE_URL="$UIBASEURL" \
+  "$TEST_IMAGE" \
+  pytest "$@"
