@@ -28,7 +28,7 @@ on:
         type: string
         default: ""
   push:
-    branches: [main, master, tests-in-pipeline]
+    branches: [main, master, run-tests]
 
 jobs:
   run:
