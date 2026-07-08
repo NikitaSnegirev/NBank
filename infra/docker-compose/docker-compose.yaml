@@ -18,7 +18,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   fraud-mock:
-    image: ${TEST_IMAGE:-nbank-tests:v1}
+    image: python:3.11-slim
     command: [ "python", "/app/infra/fraud-mock/server.py" ]
     ports:
       - "8080:8080"
