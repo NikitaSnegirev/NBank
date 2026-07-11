@@ -3,11 +3,17 @@
 set -Eeuo pipefail
 
 COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose/docker-compose.yaml}"
+COMPOSE_PROJECT="${COMPOSE_PROJECT:-docker-compose}"
 TEST_IMAGE="${TEST_IMAGE:-nbank-tests:v1}"
 
-APIBASEURL="http://localhost:4111"
-UIBASEURL="http://localhost:3000"
-FRAUD_MOCK_ADMIN_URL="${FRAUD_MOCK_ADMIN_URL:-http://localhost:8080/__admin/config}"
+HOST_APIBASEURL="${HOST_APIBASEURL:-http://localhost:4111}"
+HOST_UIBASEURL="${HOST_UIBASEURL:-http://localhost:3000}"
+APIBASEURL="${APIBASEURL:-http://backend:4111}"
+UIBASEURL="${UIBASEURL:-http://frontend}"
+FRAUD_ALIAS="${FRAUD_ALIAS:-fraud-mock}"
+NETWORK_NAME="${COMPOSE_PROJECT}_nbank-network"
+
+export FRAUD_DETECTION_SERVICE_URL="${FRAUD_DETECTION_SERVICE_URL:-http://${FRAUD_ALIAS}:8080}"
 
 resolve_workspace_dir() {
   if [ -n "${WORKSPACE_DIR:-}" ]; then
@@ -27,7 +33,7 @@ cleanup() {
   set +e
   echo
   echo "Останавливаем тестовое окружение..."
-  docker compose -f "$COMPOSE_FILE" down -v --remove-orphans
+  docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" down -v --remove-orphans
 
   if [ "$exit_code" -eq 0 ]; then
     echo "Готово: тесты завершились успешно, окружение остановлено."
@@ -58,36 +64,41 @@ wait_for_url() {
 
   echo "Ошибка: $service_name не стал доступен по адресу $url"
   echo "Последние логи окружения:"
-  docker compose -f "$COMPOSE_FILE" logs --tail=100
+  docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" logs --tail=100
   return 1
 }
 
 trap cleanup EXIT
 
 echo "Поднимаем тестовое окружение через Docker Compose..."
-docker compose -f "$COMPOSE_FILE" up -d
+docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" up -d
 
 echo
 echo "Проверяем готовность сервисов..."
-wait_for_url "Backend API" "$APIBASEURL/actuator/health"
-wait_for_url "Frontend UI" "$UIBASEURL"
+wait_for_url "Backend API" "$HOST_APIBASEURL/actuator/health"
+wait_for_url "Frontend UI" "$HOST_UIBASEURL"
 
 echo
 echo "Запускаем API и UI тесты в контейнере..."
 echo "APIBASEURL=$APIBASEURL"
 echo "UIBASEURL=$UIBASEURL"
-echo "FRAUD_MOCK_ADMIN_URL=$FRAUD_MOCK_ADMIN_URL"
+echo "FRAUD_DETECTION_SERVICE_URL=$FRAUD_DETECTION_SERVICE_URL"
 echo "TEST_IMAGE=$TEST_IMAGE"
 echo "WORKSPACE_DIR=$WORKSPACE_DIR"
+echo "NETWORK_NAME=$NETWORK_NAME"
+echo "FRAUD_ALIAS=$FRAUD_ALIAS"
 
 MSYS_NO_PATHCONV=1 docker run --rm \
-  --network host \
+  --network "$NETWORK_NAME" \
+  --network-alias "$FRAUD_ALIAS" \
   -v "$WORKSPACE_DIR:/app" \
   -w /app \
   -e APIBASEURL="$APIBASEURL" \
   -e UIBASEURL="$UIBASEURL" \
+  -e SERVER="$APIBASEURL/api" \
   -e UI_BASE_URL="$UIBASEURL" \
   -e PLAYWRIGHT_TEST_BASE_URL="$UIBASEURL" \
-  -e FRAUD_MOCK_ADMIN_URL="$FRAUD_MOCK_ADMIN_URL" \
+  -e DB_HOST="postgres" \
+  -e DB_PORT="5432" \
   "$TEST_IMAGE" \
   pytest "$@"

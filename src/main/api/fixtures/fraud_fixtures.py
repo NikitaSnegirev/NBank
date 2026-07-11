@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import threading
 from dataclasses import dataclass
@@ -9,7 +8,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Optional
 
 import pytest
-import requests
 
 
 @dataclass(frozen=True)
@@ -55,20 +53,6 @@ def fraud_check_mock_server(request: pytest.FixtureRequest):
     """
     cfg = _load_fraud_mock_config(request)
     if cfg is None:
-        yield
-        return
-
-    admin_url = os.getenv("FRAUD_MOCK_ADMIN_URL")
-    if admin_url:
-        response = requests.post(
-            admin_url,
-            json={
-                "endpoint": cfg.endpoint,
-                "response_body": cfg.response_body,
-            },
-            timeout=5,
-        )
-        response.raise_for_status()
         yield
         return
 
