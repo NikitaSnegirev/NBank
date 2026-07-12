@@ -34,7 +34,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--api-version",
         action="store",
-        default=os.getenv("API_VERSION"),
+        default=os.getenv("NBANK_BACKEND_VERSION"),
         help="Backend version under test. Used with @pytest.mark.api_version(...).",
     )
 
@@ -49,11 +49,6 @@ def pytest_configure(config: pytest.Config) -> None:
 
     config._nbank_seed = int(seed)
     _apply_global_seed(int(seed))
-
-    api_version = config.getoption("--api-version")
-    if api_version:
-        os.environ["API_VERSION"] = str(api_version)
-
 
 def pytest_configure_node(node) -> None:
     seed = getattr(node.config, "_nbank_seed", None)
