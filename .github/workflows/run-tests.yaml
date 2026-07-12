@@ -3,13 +3,6 @@ name: Run tests
 on:
   workflow_dispatch:
     inputs:
-      api_version:
-        description: "Backend version tag (matches @pytest.mark.api_version(..))"
-        required: true
-        type: choice
-        options:
-          - with_database
-          - with_fraud_check
       suite:
         description: "Which suite to run"
         required: true
@@ -46,8 +39,7 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          # если requirements.txt поменялся, то ключ новый, кеш не используется
-          # если requirements.txt НЕ поменялся, то ключ старый, кеш используется
+          # Новый requirements.txt создает новый ключ кеша.
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -77,31 +69,42 @@ jobs:
         env:
           UI_BASE_URL: http://localhost:3000
           DB_HOST: localhost
-          # при push inputs нет — подставляем значения по умолчанию
-          API_VERSION_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.api_version || 'with_database' }}
+          # При push inputs нет — подставляем значения по умолчанию.
           SUITE_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'api' }}
           MARKERS_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.markers || '' }}
         run: |
           set -eux
-          
-          API_VERSION_INPUT="${API_VERSION_INPUT:-with_database}"
+
           SUITE_INPUT="${SUITE_INPUT:-api}"
           MARKERS="${MARKERS_INPUT:-}"
-          
-          M_OPT=""
-          
-          if [ -n "$MARKERS" ]; then
-            M_OPT="-m $MARKERS"
-          fi
-          
-          if [ "$SUITE_INPUT" = "api" ]; then
-            pytest -m api --api-version "$API_VERSION_INPUT" $M_OPT -q
-          elif [ "$SUITE_INPUT" = "ui" ]; then
-            pytest -m ui $M_OPT -q
-          else
-            pytest -m api --api-version "$API_VERSION_INPUT" $M_OPT -q
-            pytest -m ui $M_OPT -q
-          fi
+
+          run_suite() {
+            local suite="$1"
+            local marker_expression="$suite"
+
+            if [ -n "$MARKERS" ]; then
+              marker_expression="($suite) and ($MARKERS)"
+            fi
+
+            pytest -m "$marker_expression" -q
+          }
+
+          case "$SUITE_INPUT" in
+            api)
+              run_suite api
+              ;;
+            ui)
+              run_suite ui
+              ;;
+            api+ui)
+              run_suite api
+              run_suite ui
+              ;;
+            *)
+              echo "Unknown suite: $SUITE_INPUT" >&2
+              exit 2
+              ;;
+          esac
 
       - name: Shutdown
         if: always()
