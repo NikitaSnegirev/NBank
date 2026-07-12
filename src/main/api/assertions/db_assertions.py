@@ -1,5 +1,6 @@
 from src.main.api.classes.api_manager import ApiManager
 
+
 class DbAssertions:
     @staticmethod
     def has_no_transactions_by_related_account_id(api_manager: ApiManager, related_account_id: int):
