@@ -1,124 +1,83 @@
-name: Run tests
+name: Check, test and publish
 
 on:
-  workflow_dispatch:
-    inputs:
-      api_version:
-        description: "Backend version tag (matches @pytest.mark.api_version(..))"
-        required: true
-        type: choice
-        options:
-          - with_database
-          - with_fraud_check
-      suite:
-        description: "Which suite to run"
-        required: true
-        type: choice
-        options:
-          - api
-          - ui
-          - api+ui
-      markers:
-        description: "Additional pytest markers"
-        required: false
-        default: ""
-      backend_tag:
-        description: "Docker image tag for backend (e.g. with_database_with_fix, with_fraud_check)"
-        required: true
-        type: string
-        default: ""
   push:
-    branches: [main, master, run-tests]
+    paths:
+      - "src/**"
+
+permissions:
+  contents: read
 
 jobs:
-  run:
+  pipeline:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          # Новый requirements.txt создает новый ключ кеша.
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pycodestyle==2.14.0
           playwright install --with-deps
 
-      - name: Start services
+      - name: Check Python code style
+        run: pycodestyle src
+
+      - name: Start application
         env:
-          BACKEND_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_tag || 'with_fraud_check_with_transfer_fix' }}
-          TEST_IMAGE: niko7645/nbank-tests:v1
+          NBANK_BACKEND_IMAGE: nobugsme/nbank:with_fraud_check_with_transfer_fix
         run: |
-          export NBANK_BACKEND_IMAGE="nobugsme/nbank:${BACKEND_TAG}"
           docker compose -f infra/docker-compose/docker-compose.yaml up -d
-          for i in {1..60}; do
+
+          for attempt in {1..60}; do
             if curl -sf http://localhost:4111/actuator/health >/dev/null; then
               echo "Backend is UP"
-              break
+              exit 0
             fi
-          sleep 2
-          done 
-          curl -sf http://localhost:4111/actuator/health
+            sleep 2
+          done
 
-      - name: Run pytest
+          echo "Backend did not become healthy" >&2
+          docker compose -f infra/docker-compose/docker-compose.yaml logs --tail=100
+          exit 1
+
+      - name: Run API tests
+        env:
+          DB_HOST: localhost
+        run: pytest -m api --api-version with_fraud_check -q
+
+      - name: Run UI tests
         env:
           UI_BASE_URL: http://localhost:3000
-          DB_HOST: localhost
-          # При push inputs нет — подставляем значения по умолчанию.
-          API_VERSION_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.api_version || 'with_fraud_check' }}
-          SUITE_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'api' }}
-          MARKERS_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.markers || '' }}
-        run: |
-          set -eux
+        run: pytest -m ui -q
 
-          API_VERSION_INPUT="${API_VERSION_INPUT:-with_fraud_check}"
-          SUITE_INPUT="${SUITE_INPUT:-api}"
-          MARKERS="${MARKERS_INPUT:-}"
-
-          run_suite() {
-            local suite="$1"
-            local marker_expression="$suite"
-
-            if [ -n "$MARKERS" ]; then
-              marker_expression="($suite) and ($MARKERS)"
-            fi
-
-            if [ "$suite" = "api" ]; then
-              pytest -m "$marker_expression" --api-version "$API_VERSION_INPUT" -q
-            else
-              pytest -m "$marker_expression" -q
-            fi
-          }
-
-          case "$SUITE_INPUT" in
-            api)
-              run_suite api
-              ;;
-            ui)
-              run_suite ui
-              ;;
-            api+ui)
-              run_suite api
-              run_suite ui
-              ;;
-            *)
-              echo "Unknown suite: $SUITE_INPUT" >&2
-              exit 2
-              ;;
-          esac
-
-      - name: Shutdown
+      - name: Stop application
         if: always()
         run: docker compose -f infra/docker-compose/docker-compose.yaml down
+
+      - name: Build Docker image
+        env:
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/nbank-tests:${{ github.sha }}
+        run: docker build --tag "$IMAGE" .
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image
+        env:
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/nbank-tests:${{ github.sha }}
+        run: docker push "$IMAGE"
