@@ -17,34 +17,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  fraud-mock:
-    image: python:3.11-slim
-    command: [ "python", "/app/infra/fraud-mock/server.py" ]
-    ports:
-      - "8080:8080"
-    networks:
-      - nbank-network
-    volumes:
-      - ../fraud-mock:/app/infra/fraud-mock:ro
-    healthcheck:
-      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/__admin/health', timeout=2)\"" ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
   backend:
     image: ${NBANK_BACKEND_IMAGE:-nobugsme/nbank:with_fraud_check_with_transfer_fix}
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nbank
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      FRAUD_DETECTION_SERVICE_URL: http://fraud-mock:8080
+      FRAUD_DETECTION_SERVICE_URL: ${FRAUD_DETECTION_SERVICE_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "4111:4111"
     depends_on:
       postgres:
-        condition: service_healthy
-      fraud-mock:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:4111/actuator/health || exit 1" ]

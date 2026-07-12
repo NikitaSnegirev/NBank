@@ -3,6 +3,13 @@ name: Run tests
 on:
   workflow_dispatch:
     inputs:
+      api_version:
+        description: "Backend version tag (matches @pytest.mark.api_version(..))"
+        required: true
+        type: choice
+        options:
+          - with_database
+          - with_fraud_check
       suite:
         description: "Which suite to run"
         required: true
@@ -70,11 +77,13 @@ jobs:
           UI_BASE_URL: http://localhost:3000
           DB_HOST: localhost
           # При push inputs нет — подставляем значения по умолчанию.
+          API_VERSION_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.api_version || 'with_fraud_check' }}
           SUITE_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'api' }}
           MARKERS_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.markers || '' }}
         run: |
           set -eux
 
+          API_VERSION_INPUT="${API_VERSION_INPUT:-with_fraud_check}"
           SUITE_INPUT="${SUITE_INPUT:-api}"
           MARKERS="${MARKERS_INPUT:-}"
 
@@ -86,7 +95,11 @@ jobs:
               marker_expression="($suite) and ($MARKERS)"
             fi
 
-            pytest -m "$marker_expression" -q
+            if [ "$suite" = "api" ]; then
+              pytest -m "$marker_expression" --api-version "$API_VERSION_INPUT" -q
+            else
+              pytest -m "$marker_expression" -q
+            fi
           }
 
           case "$SUITE_INPUT" in
