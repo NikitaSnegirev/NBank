@@ -31,6 +31,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=os.getenv("PYTEST_SEED"),
         help="Seed for random generators. If not set, a new seed is generated per run (and shared across xdist workers).",
     )
+    parser.addoption(
+        "--api-version",
+        action="store",
+        default=os.getenv("NBANK_BACKEND_VERSION"),
+        help="Backend version under test. Used with @pytest.mark.api_version(...).",
+    )
 
 def pytest_configure(config: pytest.Config) -> None:
     seed = None
@@ -43,7 +49,6 @@ def pytest_configure(config: pytest.Config) -> None:
 
     config._nbank_seed = int(seed)
     _apply_global_seed(int(seed))
-
 
 def pytest_configure_node(node) -> None:
     seed = getattr(node.config, "_nbank_seed", None)
@@ -80,7 +85,14 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
     for item in items:
         is_ui = bool(item.get_closest_marker("ui"))
         browsers_mark = item.get_closest_marker("browsers")
+        api_version_mark = item.get_closest_marker("api_version")
         fixts = getattr(item, "fixturenames", ()) or ()
+
+        if api_version_mark:
+            expected = str(api_version_mark.args[0]) if api_version_mark.args else ""
+            actual = str(config.getoption("--api-version") or "")
+            if not actual or actual != expected:
+                continue
 
         if browsers_mark:
             allowed = {norm_browser_name(str(x)) for x in (browsers_mark.args or ())}
