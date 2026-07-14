@@ -67,6 +67,14 @@ jobs:
           pytest -m ui -q \
             --alluredir=allure-results
 
+      - name: Generate Swagger coverage report
+        if: always()
+        run: swagger-coverage-tool save-report
+
+      - name: Stop application
+        if: always()
+        run: docker compose -f infra/docker-compose/docker-compose.yaml down
+
       - name: Load Allure report history
         if: always()
         continue-on-error: true
@@ -84,6 +92,18 @@ jobs:
           allure_history: allure-history
           gh_pages: gh-pages
 
+      - name: Add Swagger coverage report to GitHub Pages
+        if: always()
+        run: |
+          for target in \
+            allure-history/swagger-coverage \
+            "allure-history/${GITHUB_RUN_NUMBER}/swagger-coverage"; do
+            mkdir -p "$target"
+            cp coverage-results/index.html "$target/index.html"
+            cp coverage-results/coverage-report.json \
+              "$target/coverage-report.json"
+          done
+
       - name: Publish Allure report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
@@ -91,14 +111,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-
-      - name: Generate Swagger coverage report
-        if: always()
-        run: swagger-coverage-tool save-report
-
-      - name: Stop application
-        if: always()
-        run: docker compose -f infra/docker-compose/docker-compose.yaml down
 
       - name: Upload Swagger coverage report
         if: always()
