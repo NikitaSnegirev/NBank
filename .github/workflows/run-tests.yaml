@@ -95,6 +95,7 @@ jobs:
       - name: Add Swagger coverage report to GitHub Pages
         if: always()
         run: |
+          sudo chown -R "$(id -u):$(id -g)" allure-history
           for target in \
             allure-history/swagger-coverage \
             "allure-history/${GITHUB_RUN_NUMBER}/swagger-coverage"; do
