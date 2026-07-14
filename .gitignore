@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 coverage-results/
+allure-results/
+allure-report/
+allure-history/
+gh-pages/
