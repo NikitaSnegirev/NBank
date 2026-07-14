@@ -4,7 +4,7 @@ on:
   push:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   pipeline:
@@ -67,6 +67,14 @@ jobs:
           pytest -m ui -q \
             --alluredir=allure-results
 
+      - name: Load Allure report history
+        if: always()
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
       - name: Generate Allure report
         if: always()
         uses: simple-elf/allure-report-action@v1.14
@@ -76,13 +84,13 @@ jobs:
           allure_history: allure-history
           gh_pages: gh-pages
 
-      - name: Upload Allure report
+      - name: Publish Allure report to GitHub Pages
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: allure-report
-          path: allure-report/
-          if-no-files-found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
 
       - name: Generate Swagger coverage report
         if: always()
