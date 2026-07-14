@@ -8,3 +8,4 @@ allure-pytest
 pytest-playwright
 pytest-xdist
 psycopg[binary]
+swagger-coverage-tool

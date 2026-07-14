@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from src.main.api.models.admin_user_response import AdminUserResponse
 from src.main.api.models.create_account_response import CreateAccountResponse
@@ -23,6 +23,7 @@ class EndpointConfig:
     url: str
     request_model: BaseModel
     response_model: BaseModel
+    swagger_path: Optional[str] = None
 
 
 class Endpoint(Enum):
@@ -35,7 +36,8 @@ class Endpoint(Enum):
     ADMIN_DELETE_USER = EndpointConfig(
         url='/admin/users',
         request_model=None,
-        response_model=None
+        response_model=None,
+        swagger_path='/admin/users/{id}'
     )
 
     ADMIN_GET_ALL_USERS = EndpointConfig(
@@ -77,7 +79,8 @@ class Endpoint(Enum):
     GET_TRANSACTIONS= EndpointConfig(
         url='/accounts',
         request_model=None,
-        response_model=list[TransactionResponse]
+        response_model=list[TransactionResponse],
+        swagger_path='/accounts/{accountId}/transactions'
     )
 
     CUSTOMER_UPDATE_PROFILE = EndpointConfig(

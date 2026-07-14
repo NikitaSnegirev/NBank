@@ -55,16 +55,31 @@ jobs:
       - name: Run API tests
         env:
           DB_HOST: localhost
-        run: pytest -m api --api-version with_fraud_check -q
+        run: |
+          rm -rf coverage-results
+          mkdir -p coverage-results/.history
+          pytest -m api --api-version with_fraud_check -q
 
       - name: Run UI tests
         env:
           UI_BASE_URL: http://localhost:3000
         run: pytest -m ui -q
 
+      - name: Generate Swagger coverage report
+        if: always()
+        run: swagger-coverage-tool save-report
+
       - name: Stop application
         if: always()
         run: docker compose -f infra/docker-compose/docker-compose.yaml down
+
+      - name: Upload Swagger coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-coverage-report
+          path: coverage-results/
+          if-no-files-found: warn
 
       - name: Build Docker image
         env:
