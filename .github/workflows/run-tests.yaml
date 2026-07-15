@@ -2,6 +2,8 @@ name: Check, test and publish
 
 on:
   push:
+    paths:
+      - "src/**"
 
 permissions:
   contents: write
