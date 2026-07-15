@@ -1,0 +1,1 @@
+id=47 username='GBNCOR' password='$2a$10$3erDTt.HmSp6xXU4gUBkA.QGLc5EfKsGPwbhJZfzCRTNXcrHPZRfe' name=None role='USER' accounts=[]
