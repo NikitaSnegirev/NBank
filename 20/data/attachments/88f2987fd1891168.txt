@@ -1,0 +1,1 @@
+id=57 username='wSIpJ' password='$2a$10$5b1mxEijziWSeAq8wF54RuaekFTfsdgMZO1oMSZRFeh4stB6pGALW' name=None role='USER' accounts=[]
