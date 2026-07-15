@@ -3,7 +3,6 @@ from faker import Faker
 
 faker = Faker()
 
-
 class RandomData:
     @staticmethod
     def get_username(length=random.randint(3, 15)) -> str:

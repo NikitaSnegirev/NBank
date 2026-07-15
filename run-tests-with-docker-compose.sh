@@ -88,6 +88,10 @@ echo "WORKSPACE_DIR=$WORKSPACE_DIR"
 echo "NETWORK_NAME=$NETWORK_NAME"
 echo "FRAUD_ALIAS=$FRAUD_ALIAS"
 
+rm -rf coverage-results
+mkdir -p coverage-results/.history
+
+set +e
 MSYS_NO_PATHCONV=1 docker run --rm \
   --network "$NETWORK_NAME" \
   --network-alias "$FRAUD_ALIAS" \
@@ -100,5 +104,26 @@ MSYS_NO_PATHCONV=1 docker run --rm \
   -e PLAYWRIGHT_TEST_BASE_URL="$UIBASEURL" \
   -e DB_HOST="postgres" \
   -e DB_PORT="5432" \
+  -e SWAGGER_COVERAGE_CONFIG_FILE_YAML="/app/swagger_coverage_config.docker.yaml" \
   "$TEST_IMAGE" \
   pytest "$@"
+TEST_EXIT_CODE=$?
+
+echo
+echo "Генерация Swagger coverage report..."
+MSYS_NO_PATHCONV=1 docker run --rm \
+  --network "$NETWORK_NAME" \
+  -v "$WORKSPACE_DIR:/app" \
+  -w /app \
+  -e SWAGGER_COVERAGE_CONFIG_FILE_YAML="/app/swagger_coverage_config.docker.yaml" \
+  --entrypoint swagger-coverage-tool \
+  "$TEST_IMAGE" \
+  save-report
+REPORT_EXIT_CODE=$?
+set -e
+
+if [ "$TEST_EXIT_CODE" -ne 0 ]; then
+  exit "$TEST_EXIT_CODE"
+fi
+
+exit "$REPORT_EXIT_CODE"

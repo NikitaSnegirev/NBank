@@ -16,6 +16,11 @@ ENV/
 # --- Build artifacts ---
 build/
 dist/
+coverage-results/
+allure-results/
+allure-report/
+allure-history/
+gh-pages/
 
 # --- IDE ---
 .idea/

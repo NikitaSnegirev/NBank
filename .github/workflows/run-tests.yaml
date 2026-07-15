@@ -4,9 +4,10 @@ on:
   push:
     paths:
       - "src/**"
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   pipeline:
@@ -55,16 +56,73 @@ jobs:
       - name: Run API tests
         env:
           DB_HOST: localhost
-        run: pytest -m api --api-version with_fraud_check -q
+        run: |
+          rm -rf coverage-results
+          mkdir -p coverage-results/.history
+          pytest -m api --api-version with_fraud_check -q \
+            --alluredir=allure-results \
+            --clean-alluredir
 
       - name: Run UI tests
         env:
           UI_BASE_URL: http://localhost:3000
-        run: pytest -m ui -q
+        run: |
+          pytest -m ui -q \
+            --alluredir=allure-results
+
+      - name: Generate Swagger coverage report
+        if: always()
+        run: swagger-coverage-tool save-report
 
       - name: Stop application
         if: always()
         run: docker compose -f infra/docker-compose/docker-compose.yaml down
+
+      - name: Load Allure report history
+        if: always()
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.14
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          gh_pages: gh-pages
+
+      - name: Add Swagger coverage report to GitHub Pages
+        if: always()
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" allure-history
+          for target in \
+            allure-history/swagger-coverage \
+            "allure-history/${GITHUB_RUN_NUMBER}/swagger-coverage"; do
+            mkdir -p "$target"
+            cp coverage-results/index.html "$target/index.html"
+            cp coverage-results/coverage-report.json \
+              "$target/coverage-report.json"
+          done
+
+      - name: Publish Allure report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Upload Swagger coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-coverage-report
+          path: coverage-results/
+          if-no-files-found: warn
 
       - name: Build Docker image
         env:
